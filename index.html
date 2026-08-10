@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>מלחמת טורים — אונליין</title>
+<title>Column War — מלחמת טורים</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
     padding:calc(8px + var(--safe-t)) 10px calc(10px + var(--safe-b))}
   h1,h2,h3,.brand{font-family:"Fredoka",sans-serif;font-weight:600}
   .wrap{max-width:960px;margin:0 auto}
-  h1.brand{font-size:26px;text-align:center;margin:2px 0 10px}
+  h1.brand{font-size:26px;text-align:center;margin:2px 0 8px}
   h1.brand span{color:var(--gold)}
   .muted{color:var(--muted)}
   button{font-family:"Fredoka",inherit;cursor:pointer;border:none;border-radius:14px;padding:13px 18px;
@@ -35,11 +35,15 @@
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   .opt{flex:1 1 44%;min-width:130px;background:var(--panel2);border:2px solid transparent;border-radius:14px;
-    padding:14px;cursor:pointer;text-align:center;min-height:56px;display:flex;align-items:center;justify-content:center;font-weight:700}
+    padding:14px;cursor:pointer;text-align:center;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700}
   .opt small{display:block;color:var(--muted);font-weight:600;font-size:12px;margin-top:3px}
   .opt.sel{border-color:var(--gold);background:#1b3524}
   .opt.sm{flex:1 1 28%;min-width:70px;padding:11px 6px;font-size:14px;font-weight:700}
-  .row.grid5{gap:7px}
+  /* language switch */
+  .langrow{display:flex;gap:6px;justify-content:center;margin-bottom:4px}
+  .langbtn{background:var(--panel2);color:var(--muted);border:1px solid var(--line);border-radius:999px;
+    padding:6px 16px;font-size:13px;min-height:0;box-shadow:none;font-weight:700}
+  .langbtn.active{background:#1b3524;color:var(--gold);border-color:var(--gold)}
   /* custom themed dropdown */
   .dd{position:relative}
   .dd-btn{width:100%;display:flex;align-items:center;justify-content:space-between;
@@ -82,7 +86,6 @@
     padding:4px 3px 6px;display:flex;flex-direction:column;align-items:center;min-height:0;
     transition:border-color .15s,box-shadow .15s}
   .col .lbl{font-size:9.5px;color:#bfe0d3;text-align:center;font-weight:700;margin-bottom:4px;letter-spacing:-.2px}
-  /* cards in a column overlap vertically so both boards fit on one screen */
   .col .card{margin:0 auto}
   .col .card + .card{margin-top:-34px}
   .col.place{cursor:pointer}
@@ -102,7 +105,6 @@
     font-size:25px;opacity:.9;pointer-events:none}
   .card.back{background:repeating-linear-gradient(45deg,#1d5f80,#1d5f80 7px,#164a63 7px,#164a63 14px);
     border:2px solid #2f7ba1;box-shadow:inset 0 0 0 3px rgba(255,255,255,.06),0 3px 7px rgba(0,0,0,.4)}
-  /* board cards: compact + a clear centered index in the exposed strip */
   .card.mini{max-width:41px;border-radius:6px;padding:2px 3px;box-shadow:0 2px 4px rgba(0,0,0,.5)}
   .card.mini .corner{flex-direction:row;gap:1px;align-items:baseline;align-self:center}
   .card.mini .corner b{font-size:14px;font-weight:800;letter-spacing:-.5px}
@@ -117,14 +119,11 @@
   .hidnote{font-size:11.5px;color:#cfe9de;text-align:center;margin-top:9px;display:flex;align-items:center;
     justify-content:center;gap:6px;font-weight:700;opacity:.92}
   .hidnote svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;flex:none}
-  /* hand as an overlapping fan: bigger cards, all six stay on one row */
   .hand{display:flex;justify-content:center;margin-top:10px;direction:ltr;padding-top:8px}
-  .hand .card{width:62px;max-width:62px;flex:0 0 auto;margin-left:-16px;cursor:pointer;
-    transition:transform .12s ease}
+  .hand .card{width:62px;max-width:62px;flex:0 0 auto;margin-left:-16px;cursor:pointer;transition:transform .12s ease}
   .hand .card:first-child{margin-left:0}
   .hand .card:hover{transform:translateY(-8px);z-index:6}
   .hand .card.sel{outline:3px solid var(--gold);transform:translateY(-14px);z-index:7}
-  .hand .card.burnable{outline:3px solid #ff7a3d}
   .hand .card.burnable{outline:3px solid #ff7a3d}
   .hint{font-size:13.5px;color:#dfeee7;text-align:center;margin:6px 2px;min-height:20px;font-weight:600}
   .center{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:20px}
@@ -151,8 +150,19 @@
   .sb-records{margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:9px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.8}
   .sb-records b{color:var(--gold)}
   .toast{position:fixed;top:calc(10px + var(--safe-t));left:50%;transform:translateX(-50%);background:var(--red);
-    color:#fff;padding:10px 18px;border-radius:12px;font-weight:700;z-index:99;box-shadow:var(--shadow);display:none}
-  /* end-screen reveal animation */
+    color:#fff;padding:10px 18px;border-radius:12px;font-weight:700;z-index:99;box-shadow:var(--shadow);display:none;max-width:92%;text-align:center}
+  /* win animation: confetti + banner glow */
+  .confetti{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+  .confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;opacity:.95;animation:conf 2.6s linear forwards}
+  @keyframes conf{0%{transform:translateY(-16px) rotate(0)}100%{transform:translateY(110vh) rotate(700deg)}}
+  #banner.win-glow{animation:bannerIn .5s ease both, winGlow 1.4s ease-in-out .5s infinite}
+  @keyframes winGlow{0%,100%{box-shadow:0 0 0 rgba(231,182,75,0)}50%{box-shadow:0 0 26px rgba(231,182,75,.6)}}
+  /* how-to-play */
+  .howto h2{font-size:20px;text-align:center;margin:6px 0 10px}
+  .howto .panel p{line-height:1.75;font-size:14.5px;margin:0 0 10px}
+  .howto .panel p:last-child{margin-bottom:0}
+  .howto .panel h3{font-size:15px;color:var(--gold);margin:14px 0 6px}
+  .howto ul{margin:6px 0;padding-inline-start:20px;line-height:1.75;font-size:14px}
   @keyframes rowIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
   @keyframes cardReveal{from{transform:rotateY(90deg);opacity:.15}to{transform:rotateY(0);opacity:1}}
   @keyframes bannerIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
@@ -169,92 +179,106 @@
 <body>
 <div class="toast" id="toast"></div>
 <div class="wrap">
-  <h1 class="brand">מלחמת <span>טורים</span></h1>
+  <div class="langrow">
+    <button class="langbtn" data-lang="he" onclick="setLang('he')">עברית</button>
+    <button class="langbtn" data-lang="en" onclick="setLang('en')">English</button>
+    <button class="langbtn" id="soundBtn" onclick="toggleSound()" style="min-width:46px" aria-label="sound">🔊</button>
+  </div>
+  <h1 class="brand" id="brand" data-i18n-html="brandHTML">מלחמת <span>טורים</span></h1>
 
   <!-- HOME -->
   <div id="home" class="screen active">
     <div class="panel">
-      <div class="lbl-cap">שם השחקן</div>
-      <input id="name" type="text" value="" placeholder="איך קוראים לך">
+      <div class="lbl-cap" data-i18n="playerName">שם השחקן</div>
+      <input id="name" type="text" value="" data-i18n-ph="playerNamePh" placeholder="איך קוראים לך">
     </div>
 
     <div class="panel">
-      <div class="lbl-cap">פתיחת משחק חדש</div>
+      <div class="lbl-cap" data-i18n="newGame">פתיחת משחק חדש</div>
       <div class="row">
-        <div class="opt sel" data-mode="majority">רוב הידיים<small>הכי הרבה טורים</small></div>
-        <div class="opt" data-mode="points">ניקוד מצטבר<small>סכום החוזק</small></div>
+        <div class="opt sel" data-mode="majority"><span data-i18n="modeMajority">רוב הידיים</span><small data-i18n="modeMajoritySub">הכי הרבה טורים</small></div>
+        <div class="opt" data-mode="points"><span data-i18n="modePoints">ניקוד מצטבר</span><small data-i18n="modePointsSub">סכום החוזק</small></div>
       </div>
-      <div class="lbl-cap" style="margin-top:14px">זמן לתור</div>
+      <div class="lbl-cap" style="margin-top:14px" data-i18n="turnTime">זמן לתור</div>
       <div class="dd" id="timerDD">
         <button type="button" class="dd-btn" onclick="toggleTimerDD(event)">
           <span id="timerLabel">20 שניות</span>
           <span class="dd-chev"></span>
         </button>
         <div class="dd-list" id="timerList">
-          <div class="dd-item" data-v="10">10 שניות</div>
-          <div class="dd-item sel" data-v="20">20 שניות</div>
-          <div class="dd-item" data-v="30">30 שניות</div>
-          <div class="dd-item" data-v="60">דקה</div>
-          <div class="dd-item" data-v="120">2 דקות</div>
+          <div class="dd-item" data-v="10" data-i18n="sec10">10 שניות</div>
+          <div class="dd-item sel" data-v="20" data-i18n="sec20">20 שניות</div>
+          <div class="dd-item" data-v="30" data-i18n="sec30">30 שניות</div>
+          <div class="dd-item" data-v="60" data-i18n="min1">דקה</div>
+          <div class="dd-item" data-v="120" data-i18n="min2">2 דקות</div>
         </div>
       </div>
 
-      <button class="big" style="margin-top:16px" onclick="createRoom()">צור חדר וקבל קוד</button>
-      <button class="big ghost" style="margin-top:10px" onclick="showSolo()">🤖 שחק נגד המחשב</button>
+      <button class="big" style="margin-top:16px" onclick="createRoom()" data-i18n="createRoom">צור חדר וקבל קוד</button>
+      <button class="big ghost" style="margin-top:10px" onclick="showSolo()" data-i18n="playVsComputer">🤖 שחק נגד המחשב</button>
 
       <div id="soloPanel" style="display:none;margin-top:14px">
-        <div class="lbl-cap">בחרו רמת מחשב כדי להתחיל</div>
+        <div class="lbl-cap" data-i18n="chooseDiff">בחרו רמת מחשב כדי להתחיל</div>
         <div class="row" id="diffOpts">
-          <div class="opt sm" onclick="startSolo('easy')">קל</div>
-          <div class="opt sm" onclick="startSolo('medium')">בינוני</div>
-          <div class="opt sm" onclick="startSolo('hard')">קשה</div>
-          <div class="opt sm" onclick="startSolo('veryhard')">קשה מאוד</div>
+          <div class="opt sm" onclick="startSolo('easy')" data-i18n="diffEasy">קל</div>
+          <div class="opt sm" onclick="startSolo('medium')" data-i18n="diffMedium">בינוני</div>
+          <div class="opt sm" onclick="startSolo('hard')" data-i18n="diffHard">קשה</div>
+          <div class="opt sm" onclick="startSolo('veryhard')" data-i18n="diffVeryhard">קשה מאוד</div>
         </div>
       </div>
     </div>
 
     <div class="panel">
-      <div class="lbl-cap">הצטרפות לחדר קיים</div>
+      <div class="lbl-cap" data-i18n="joinRoom">הצטרפות לחדר קיים</div>
       <input id="joinCode" class="code" type="text" maxlength="4" placeholder="ABCD">
-      <button class="big ghost" style="margin-top:12px" onclick="joinRoom()">הצטרף</button>
+      <button class="big ghost" style="margin-top:12px" onclick="joinRoom()" data-i18n="joinBtn">הצטרף</button>
     </div>
-    <div style="text-align:center;color:var(--muted);font-size:11px;margin:18px 0 4px;opacity:.7">מלחמת טורים · גרסה 2.0</div>
+
+    <button class="big ghost" onclick="show('howto')" data-i18n="howToPlay">📖 איך משחקים</button>
+    <div style="text-align:center;color:var(--muted);font-size:11px;margin:16px 0 4px;opacity:.7" data-i18n="version">מלחמת טורים · גרסה 2.1</div>
+  </div>
+
+  <!-- HOW TO PLAY -->
+  <div id="howto" class="screen howto">
+    <h2 data-i18n="howToTitle">איך משחקים</h2>
+    <div class="panel" id="howtoBody" data-i18n-html="rulesHTML"></div>
+    <button class="big" onclick="show('home')" data-i18n="back">חזרה</button>
   </div>
 
   <!-- LOBBY -->
   <div id="lobby" class="screen">
     <div class="center">
-      <p class="muted">שתפו את הקוד עם החבר/ה כדי שיצטרפו:</p>
+      <p class="muted" data-i18n="shareCodeMsg">שתפו את הקוד עם החבר/ה כדי שיצטרפו:</p>
       <div class="codebox" id="lobbyCode">----</div>
-      <button id="shareBtn" onclick="shareLink()">שתף קישור למשחק</button>
-      <button class="ghost" id="copyBtn" onclick="copyCode()">העתק קוד בלבד</button>
-      <p class="muted" id="lobbyStatus">ממתין לשחקן שני…</p>
+      <button id="shareBtn" onclick="shareLink()" data-i18n="shareLink">שתף קישור למשחק</button>
+      <button class="ghost" id="copyBtn" onclick="copyCode()" data-i18n="copyCode">העתק קוד בלבד</button>
+      <p class="muted" id="lobbyStatus" data-i18n="waiting">ממתין לשחקן שני…</p>
     </div>
   </div>
 
   <!-- GAME -->
   <div id="game" class="screen">
     <div class="topbar">
-      <div class="pill">תור: <b id="curName"></b></div>
-      <div class="pill">קופה: <b id="deckCount"></b></div>
+      <div class="pill"><span data-i18n="turnLabel">תור:</span> <b id="curName"></b></div>
+      <div class="pill"><span data-i18n="deckLabel">קופה:</span> <b id="deckCount"></b></div>
       <div class="pill">⏱ <b id="timeLeft">—</b></div>
       <div class="pill" id="seriesPill" style="display:none"></div>
     </div>
     <div class="timerbar" id="timerbar"><i id="timerfill"></i></div>
     <div class="thinking" id="thinking"></div>
     <div class="felt">
-      <h3><span id="oppName"></span> <span class="tag">יד: <span id="oppHandCount"></span></span></h3>
+      <h3><span id="oppName"></span> <span class="tag"><span data-i18n="handShort">יד:</span> <span id="oppHandCount"></span></span></h3>
       <div class="cols" id="oppCols"></div>
     </div>
     <div class="felt">
-      <h3><span id="meName"></span> <span class="tag">הטורים שלך</span></h3>
+      <h3><span id="meName"></span> <span class="tag" data-i18n="yourColumns">הטורים שלך</span></h3>
       <div class="cols" id="myCols"></div>
-      <div class="hidnote"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg> הקלף החמישי בכל טור (המסומן) מוסתר מהיריב</div>
+      <div class="hidnote"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg> <span data-i18n="hidNote">הקלף החמישי בכל טור (המסומן) מוסתר מהיריב</span></div>
     </div>
     <div class="panel" style="margin:8px 0">
       <div class="row" style="gap:6px;margin-bottom:6px">
-        <button class="ghost" id="sortBtn" style="flex:1;min-height:42px;padding:8px;font-size:14px" onclick="toggleHandSort()">⇅ סדר: לפי מספר</button>
-        <button class="ghost" id="burnBtn" style="flex:1;min-height:42px;padding:8px;font-size:14px" onclick="armBurn()">🔥 שריפה</button>
+        <button class="ghost" id="sortBtn" style="flex:1;min-height:42px;padding:8px;font-size:14px" onclick="toggleHandSort()">⇅</button>
+        <button class="ghost" id="burnBtn" style="flex:1;min-height:42px;padding:8px;font-size:14px" onclick="armBurn()">🔥</button>
       </div>
       <div class="hint" id="hint"></div>
       <div class="hand" id="myHand"></div>
@@ -266,8 +290,8 @@
     <div id="banner" class="banner"></div>
     <div id="seriesBoard"></div>
     <div id="matchups"></div>
-    <button class="big" style="margin:14px 0 8px" onclick="rematch()">עוד סיבוב</button>
-    <button class="big ghost" onclick="location.reload()">יציאה</button>
+    <button class="big" style="margin:14px 0 8px" onclick="rematch()" data-i18n="anotherRound">עוד סיבוב</button>
+    <button class="big ghost" onclick="location.reload()" data-i18n="exit">יציאה</button>
   </div>
 </div>
 
@@ -276,6 +300,164 @@ const SUITS_RED=new Set(['♥','♦']);
 const RANK_LABEL={11:'J',12:'Q',13:'K',14:'A'};
 const rankLabel=r=>RANK_LABEL[r]||String(r);
 const EYE_OFF='<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg>';
+
+/* ================= i18n ================= */
+const I18N={
+  he:{
+    brandHTML:'מלחמת <span>טורים</span>', brandPlain:'מלחמת טורים',
+    playerName:'שם השחקן', playerNamePh:'איך קוראים לך',
+    newGame:'פתיחת משחק חדש',
+    modeMajority:'רוב הידיים', modeMajoritySub:'הכי הרבה טורים',
+    modePoints:'ניקוד מצטבר', modePointsSub:'סכום החוזק',
+    turnTime:'זמן לתור', sec10:'10 שניות', sec20:'20 שניות', sec30:'30 שניות', min1:'דקה', min2:'2 דקות',
+    createRoom:'צור חדר וקבל קוד', playVsComputer:'🤖 שחק נגד המחשב',
+    chooseDiff:'בחרו רמת מחשב כדי להתחיל',
+    diffEasy:'קל', diffMedium:'בינוני', diffHard:'קשה', diffVeryhard:'קשה מאוד',
+    joinRoom:'הצטרפות לחדר קיים', joinBtn:'הצטרף',
+    howToPlay:'📖 איך משחקים', howToTitle:'איך משחקים', back:'חזרה',
+    version:'מלחמת טורים · גרסה 2.2',
+    shareCodeMsg:'שתפו את הקוד עם החבר/ה כדי שיצטרפו:', shareLink:'שתף קישור למשחק', copyCode:'העתק קוד בלבד', waiting:'ממתין לשחקן שני…',
+    turnLabel:'תור:', deckLabel:'קופה:', seriesLabel:'סדרה:', handShort:'יד:', yourColumns:'הטורים שלך',
+    oppSuffix:'(יריב)', colWord:'טור', handWord:'היד',
+    hidNote:'הקלף החמישי בכל טור (המסומן) מוסתר מהיריב',
+    sortByRank:'⇅ סדר: לפי מספר', sortByRun:'⇅ סדר: לפי סדרה',
+    burn:'🔥 שריפה', burnUsed:'🔥 שריפה נוצלה', burnCancel:'🔥 בחרו קלף (ביטול)',
+    thinkingOpp:'תור היריב…', reconnecting:'מתחבר מחדש…',
+    hintWaiting:'ממתין ליריב…', hintDrew:'משכת: ', hintBurn:'לחצו על קלף כדי לזרוק ולמשוך חדש.',
+    hintPlace:'עכשיו לחצו על טור להורדה.', hintPick:'בחרו קלף מהיד.',
+    draw:'תיקו!', youWin:'🏆 ניצחת!', winsSuffix:'ניצח', rowTie:'תיקו',
+    detailMajority:'רוב הידיים', detailPoints:'ניקוד מצטבר', tiesLabel:'תיקו:',
+    anotherRound:'עוד סיבוב', exit:'יציאה',
+    seriesGame:'סדרה · משחק #', wins:'ניצחונות', totalPoints:'נקודות מצטברות:',
+    bestHandLabel:'יד הכי טובה בסדרה:', topGameLabel:'שיא נקודות במשחק:',
+    codeCopied:'הקוד הועתק', linkCopied:'הקישור הועתק', inviteToast:'יש לך הזמנה — כתוב שם ולחץ הצטרף',
+    connLost:'החיבור אבד. רענן את הדף כדי להמשיך.', backInGame:'חזרת למשחק', oppBack:'היריב חזר',
+    cantConnect:'לא ניתן להתחבר לשרת', code4:'הקוד צריך להיות 4 תווים', oppLeft:'היריב יצא',
+    defP1:'שחקן 1', defP2:'שחקן 2', defYou:'את/ה', computer:'המחשב',
+    shareText:'בוא נשחק מלחמת טורים! הצטרף עם הקוד ',
+    rulesHTML:'<p><b>המטרה:</b> לבנות ידי פוקר חזקות יותר מהיריב.</p>'+
+      '<p>כל שחקן מקבל 6 קלפים ליד, שרק הוא רואה. בכל תור בוחרים קלף מהיד ומורידים אותו לאחד מ-4 הטורים, ואז מושכים קלף חדש מהקופה כדי לחזור ל-6 קלפים.</p>'+
+      '<p>כל טור מתמלא ב-5 קלפים. ארבעת הראשונים גלויים, והחמישי מונח הפוך: היריב לא רואה אותו אבל אתה כן (מסומן בעין חצויה).</p>'+
+      '<p>פעם אחת במשחק אפשר לשרוף קלף מהיד ולמשוך חדש במקומו, בעזרת כפתור השריפה.</p>'+
+      '<p>כשכל הטורים מלאים המשחק נגמר. גם 6 הקלפים שנשארו ביד נספרים כיד חמישית (נבחרים מהם 5 הטובים).</p>'+
+      '<p>לכל שחקן נוצרות 5 ידי פוקר (4 טורים + היד), ומשווים אותן לפי כללי פוקר.</p>'+
+      '<h3>שיטות ניצחון</h3><ul><li><b>רוב הידיים:</b> מי שזוכה ביותר ידיים מנצח.</li><li><b>ניקוד מצטבר:</b> סוכמים את חוזק כל הידיים, והגבוה מנצח.</li></ul>'+
+      '<h3>דירוג ידי פוקר (מהחזק לחלש)</h3><p>סטרייט פלאש · רביעייה · פול האוס · פלאש · סטרייט · שלישייה · זוג כפול · זוג · קלף גבוה</p>'+
+      '<h3>טיפים</h3><ul><li>כפתור הסידור מארגן את היד לפי מספר (מקבץ זוגות ושלישיות) או לפי סדרה (רצפים וצבע).</li><li>הטורים שלך מיושרים מול הטורים של היריב, השווה טור מול טור.</li></ul>',
+  },
+  en:{
+    brandHTML:'Column <span>War</span>', brandPlain:'Column War',
+    playerName:'Player name', playerNamePh:'Your name',
+    newGame:'New game',
+    modeMajority:'Most hands', modeMajoritySub:'Win most columns',
+    modePoints:'Total points', modePointsSub:'Sum of strength',
+    turnTime:'Turn time', sec10:'10 sec', sec20:'20 sec', sec30:'30 sec', min1:'1 min', min2:'2 min',
+    createRoom:'Create room & get code', playVsComputer:'🤖 Play vs computer',
+    chooseDiff:'Choose a difficulty to start',
+    diffEasy:'Easy', diffMedium:'Medium', diffHard:'Hard', diffVeryhard:'Very hard',
+    joinRoom:'Join a room', joinBtn:'Join',
+    howToPlay:'📖 How to play', howToTitle:'How to play', back:'Back',
+    version:'Column War · v2.2',
+    shareCodeMsg:'Share this code with a friend to join:', shareLink:'Share game link', copyCode:'Copy code only', waiting:'Waiting for a second player…',
+    turnLabel:'Turn:', deckLabel:'Deck:', seriesLabel:'Series:', handShort:'Hand:', yourColumns:'Your columns',
+    oppSuffix:'(opponent)', colWord:'Col', handWord:'Hand',
+    hidNote:'The 5th card in each column (marked) is hidden from your opponent',
+    sortByRank:'⇅ Sort: by rank', sortByRun:'⇅ Sort: by run',
+    burn:'🔥 Burn', burnUsed:'🔥 Burn used', burnCancel:'🔥 Pick a card (cancel)',
+    thinkingOpp:'Opponent’s turn…', reconnecting:'Reconnecting…',
+    hintWaiting:'Waiting for opponent…', hintDrew:'Drew: ', hintBurn:'Tap a card to discard and draw a new one.',
+    hintPlace:'Now tap a column to place it.', hintPick:'Pick a card from your hand.',
+    draw:'Draw!', youWin:'🏆 You win!', winsSuffix:'wins', rowTie:'Draw',
+    detailMajority:'Most hands', detailPoints:'Total points', tiesLabel:'draws:',
+    anotherRound:'Another round', exit:'Exit',
+    seriesGame:'Series · Game #', wins:'Wins', totalPoints:'Total points:',
+    bestHandLabel:'Best hand in series:', topGameLabel:'Top game score:',
+    codeCopied:'Code copied', linkCopied:'Link copied', inviteToast:'You have an invite — enter a name and tap Join',
+    connLost:'Connection lost. Refresh the page to continue.', backInGame:'Back in the game', oppBack:'Opponent is back',
+    cantConnect:'Can’t connect to the server', code4:'Code must be 4 characters', oppLeft:'Opponent left',
+    defP1:'Player 1', defP2:'Player 2', defYou:'You', computer:'Computer',
+    shareText:'Let’s play Column War! Join with code ',
+    rulesHTML:'<p><b>Goal:</b> build stronger poker hands than your opponent.</p>'+
+      '<p>Each player gets 6 cards in hand, seen only by them. Each turn you pick a card from your hand and place it into one of 4 columns, then draw a new card from the deck to return to 6.</p>'+
+      '<p>Each column fills with 5 cards. The first four are face up, and the fifth is placed face down: hidden from your opponent but visible to you (marked with an eye icon).</p>'+
+      '<p>Once per game you may burn a card from your hand and draw a new one, using the Burn button.</p>'+
+      '<p>When all columns are full the game ends. The 6 cards left in your hand also count as a fifth hand (the best 5 are used).</p>'+
+      '<p>Each player forms 5 poker hands (4 columns + the hand), compared by poker rules.</p>'+
+      '<h3>Win modes</h3><ul><li><b>Most hands:</b> whoever wins more hands wins.</li><li><b>Total points:</b> sum the strength of all hands; the higher total wins.</li></ul>'+
+      '<h3>Poker ranking (strongest to weakest)</h3><p>Straight Flush · Four of a Kind · Full House · Flush · Straight · Three of a Kind · Two Pair · Pair · High Card</p>'+
+      '<h3>Tips</h3><ul><li>The sort button arranges your hand by rank (groups pairs and trips) or by run (sequences and suit).</li><li>Your columns line up against the opponent’s — compare column vs column.</li></ul>',
+  }
+};
+let lang = 'he';
+try{ const s=localStorage.getItem('cw_lang'); if(s==='he'||s==='en') lang=s; }catch(e){}
+function t(k){ const d=I18N[lang]||I18N.he; return d[k]!=null?d[k]:(I18N.he[k]!=null?I18N.he[k]:k); }
+
+/* map server-sent Hebrew strings to the chosen language */
+const HAND_EN={'קלף גבוה':'High Card','זוג':'Pair','זוג כפול':'Two Pair','שלישייה':'Three of a Kind','סטרייט':'Straight','פלאש':'Flush','פול האוס':'Full House','רביעייה':'Four of a Kind','סטרייט פלאש':'Straight Flush','רויאל פלאש':'Royal Flush'};
+function handNameL(h){ return lang==='en' ? (HAND_EN[h]||h) : h; }
+function pname(n){ return (n==='המחשב') ? t('computer') : n; }
+const ERR_EN={'לא תורך':'Not your turn','המשחק נגמר':'Game over','טור לא חוקי':'Invalid column','הטור מלא':'Column is full','אין קלף כזה ביד':'No such card in hand','כבר שרפת פעם אחת':'Already burned once','לא נמצא חדר עם הקוד הזה':'No room with that code','החדר מלא':'Room is full','המשחק כבר לא זמין, התחילו מחדש':'Game no longer available, start again','המושב תפוס':'Seat is taken','היריב התנתק':'Opponent disconnected','היריב מתחבר מחדש…':'Opponent reconnecting…'};
+function terr(m){ return lang==='en' ? (ERR_EN[m]||m) : m; }
+
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML=t(el.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh); });
+}
+function setLang(l){
+  lang = (l==='en')?'en':'he';
+  try{ localStorage.setItem('cw_lang',lang); }catch(e){}
+  document.documentElement.lang=lang;
+  document.documentElement.dir = lang==='he'?'rtl':'ltr';
+  document.querySelectorAll('.langbtn').forEach(b=>b.classList.toggle('active', b.dataset.lang===lang));
+  applyI18n();
+  const sel=document.querySelector('#timerList .dd-item.sel'); if(sel) document.getElementById('timerLabel').textContent=sel.textContent;
+  const sb=document.getElementById('sortBtn'); if(sb) sb.textContent = handSortMode==='rank'? t('sortByRank'): t('sortByRun');
+  if(state) render();
+}
+
+/* ================= sound ================= */
+const REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+let audioCtx=null;
+let soundOn=true; try{ soundOn = localStorage.getItem('cw_sound')!=='0'; }catch(e){}
+function initAudio(){ try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }catch(e){} }
+function tone(freq,start,dur,type,vol){
+  if(!audioCtx)return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=type||'sine'; o.frequency.value=freq;
+  const t0=audioCtx.currentTime+start;
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t0); o.stop(t0+dur+0.03);
+}
+function playSound(name){
+  if(!soundOn) return; initAudio(); if(!audioCtx) return;
+  if(name==='place'){ tone(300,0,0.09,'triangle',0.18); }
+  else if(name==='select'){ tone(560,0,0.05,'sine',0.12); }
+  else if(name==='burn'){ tone(220,0,0.26,'sawtooth',0.16); tone(140,0.05,0.24,'sawtooth',0.12); }
+  else if(name==='turn'){ tone(660,0,0.10,'sine',0.11); tone(880,0.09,0.12,'sine',0.09); }
+  else if(name==='win'){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.12,0.2,'triangle',0.2)); }
+  else if(name==='lose'){ tone(400,0,0.2,'sine',0.15); tone(300,0.16,0.3,'sine',0.15); }
+}
+function toggleSound(){
+  soundOn=!soundOn; try{localStorage.setItem('cw_sound',soundOn?'1':'0');}catch(e){}
+  const b=document.getElementById('soundBtn'); if(b) b.textContent = soundOn?'🔊':'🔇';
+  if(soundOn){ initAudio(); playSound('select'); }
+}
+function confetti(){
+  if(REDUCED) return;
+  const colors=['#e7b64b','#57c98a','#ffffff','#e04b57','#4db8e0'];
+  const box=document.createElement('div'); box.className='confetti';
+  for(let i=0;i<60;i++){ const p=document.createElement('i');
+    p.style.left=(Math.random()*100)+'%'; p.style.background=colors[i%colors.length];
+    p.style.animationDelay=(Math.random()*0.7).toFixed(2)+'s';
+    p.style.animationDuration=(2.1+Math.random()*1.2).toFixed(2)+'s';
+    box.appendChild(p); }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(),4200);
+}
 
 /* hand sorting (like online Rummy): by rank (777) or by run/suit (789) */
 const SUIT_ORDER={'♠':0,'♥':1,'♣':2,'♦':3};
@@ -288,12 +470,11 @@ function sortHand(cards,mode){
 }
 function toggleHandSort(){
   handSortMode = handSortMode==='rank' ? 'run' : 'rank';
-  const b=document.getElementById('sortBtn');
-  if(b) b.textContent = handSortMode==='rank' ? '⇅ סדר: לפי מספר' : '⇅ סדר: לפי סדרה';
+  const b=document.getElementById('sortBtn'); if(b) b.textContent = handSortMode==='rank'? t('sortByRank'): t('sortByRun');
   if(state) render();
 }
 
-let ws=null, seat=null, state=null, selected=null, burnArmed=false, code=null, timerInt=null;
+let ws=null, seat=null, state=null, selected=null, burnArmed=false, code=null, timerInt=null, lastMyTurn=false;
 
 /* option pickers on home */
 document.querySelectorAll('#home .row').forEach(rowEl=>{
@@ -301,7 +482,7 @@ document.querySelectorAll('#home .row').forEach(rowEl=>{
     [...o.parentNode.children].forEach(c=>c.classList.remove('sel'));o.classList.add('sel');});
 });
 
-/* ---- custom timer dropdown ---- */
+/* custom timer dropdown */
 let timerValue=20;
 function toggleTimerDD(e){ if(e)e.stopPropagation(); document.getElementById('timerDD').classList.toggle('open'); }
 document.getElementById('timerList').addEventListener('click',e=>{
@@ -313,14 +494,9 @@ document.getElementById('timerList').addEventListener('click',e=>{
 });
 document.addEventListener('click',e=>{ if(!e.target.closest('#timerDD')) document.getElementById('timerDD').classList.remove('open'); });
 
-/* ---- vs-computer: reveal difficulty only after choosing to play the computer ---- */
-function showSolo(){
-  const el=document.getElementById('soloPanel');
-  el.style.display='block';
-  el.scrollIntoView({behavior:'smooth',block:'center'});
-}
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2600);}
+function showSolo(){ const el=document.getElementById('soloPanel'); el.style.display='block'; el.scrollIntoView({behavior:'smooth',block:'center'}); }
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function toast(m){const el=document.getElementById('toast');el.textContent=m;el.style.display='block';clearTimeout(el._h);el._h=setTimeout(()=>el.style.display='none',2600);}
 
 let reconnecting=false;
 function connect(){
@@ -335,48 +511,41 @@ function connect(){
   });
 }
 async function attemptReconnect(){
-  if(reconnecting)return;
-  reconnecting=true;
-  document.getElementById('thinking').textContent='מתחבר מחדש…';
-  toast('מתחבר מחדש…');
+  if(reconnecting)return; reconnecting=true;
+  document.getElementById('thinking').textContent=t('reconnecting'); toast(t('reconnecting'));
   for(let i=0;i<8;i++){
     await new Promise(r=>setTimeout(r,1300));
-    try{ await connect(); sendWs({type:'resume',code,seat}); reconnecting=false; return; }
-    catch(e){ /* keep trying */ }
+    try{ await connect(); sendWs({type:'resume',code,seat}); reconnecting=false; return; }catch(e){}
   }
-  reconnecting=false;
-  toast('החיבור אבד. רענן את הדף כדי להמשיך.');
+  reconnecting=false; toast(t('connLost'));
 }
 function sendWs(o){ if(ws&&ws.readyState===1) ws.send(JSON.stringify(o)); }
 
 async function createRoom(){
-  const name=document.getElementById('name').value.trim()||'שחקן 1';
+  const name=document.getElementById('name').value.trim()||t('defP1');
   const mode=document.querySelector('#home [data-mode].sel').dataset.mode;
-  try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
+  try{await connect();}catch{return toast(t('cantConnect'));}
   sendWs({type:'create',name,mode,timer:timerValue});
 }
 async function startSolo(difficulty){
-  const name=document.getElementById('name').value.trim()||'את/ה';
+  const name=document.getElementById('name').value.trim()||t('defYou');
   const mode=document.querySelector('#home [data-mode].sel').dataset.mode;
-  try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
+  try{await connect();}catch{return toast(t('cantConnect'));}
   sendWs({type:'solo',name,mode,timer:timerValue,difficulty});
 }
 async function joinRoom(){
-  const name=document.getElementById('name').value.trim()||'שחקן 2';
+  const name=document.getElementById('name').value.trim()||t('defP2');
   const c=document.getElementById('joinCode').value.trim().toUpperCase();
-  if(c.length<4)return toast('הקוד צריך להיות 4 תווים');
-  try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
+  if(c.length<4)return toast(t('code4'));
+  try{await connect();}catch{return toast(t('cantConnect'));}
   sendWs({type:'join',code:c,name});
 }
-function copyCode(){ if(code){navigator.clipboard?.writeText(code);toast('הקוד הועתק');} }
+function copyCode(){ if(code){navigator.clipboard?.writeText(code);toast(t('codeCopied'));} }
 function shareLink(){
   if(!code)return;
   const link=`${location.origin}/?room=${code}`;
-  if(navigator.share){
-    navigator.share({title:'מלחמת טורים',text:`בוא נשחק מלחמת טורים! הצטרף עם הקוד ${code}`,url:link}).catch(()=>{});
-  } else {
-    navigator.clipboard?.writeText(link); toast('הקישור הועתק');
-  }
+  if(navigator.share){ navigator.share({title:t('brandPlain'),text:t('shareText')+code,url:link}).catch(()=>{}); }
+  else { navigator.clipboard?.writeText(link); toast(t('linkCopied')); }
 }
 function rematch(){ sendWs({type:'rematch'}); }
 
@@ -386,25 +555,22 @@ function rematch(){ sendWs({type:'rematch'}); }
   if(invited){
     const el=document.getElementById('joinCode');
     if(el)el.value=invited.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);
-    setTimeout(()=>toast('יש לך הזמנה — כתוב שם ולחץ הצטרף'),400);
+    setTimeout(()=>toast(t('inviteToast')),400);
   }
 })();
 
 function onMsg(ev){
   let m;try{m=JSON.parse(ev.data);}catch{return;}
-  if(m.type==='error'){toast(m.msg);return;}
+  if(m.type==='error'){toast(terr(m.msg));return;}
   if(m.type==='created'){seat=m.seat;code=m.code;
-    if(m.solo){return;} // solo: skip lobby, wait for game state
+    if(m.solo){return;}
     document.getElementById('lobbyCode').textContent=m.code;show('lobby');return;}
   if(m.type==='joined'){seat=m.seat;code=m.code;return;}
-  if(m.type==='lobby'){
-    if(seat===0&&!m.canStart){document.getElementById('lobbyStatus').textContent='ממתין לשחקן שני…';}
-    return;
-  }
-  if(m.type==='opponent_left'){toast(m.msg||'היריב יצא');setTimeout(()=>location.reload(),1800);return;}
-  if(m.type==='opponent_wait'){toast(m.msg||'היריב מתחבר מחדש…');return;}
-  if(m.type==='opponent_back'){toast('היריב חזר');return;}
-  if(m.type==='resumed'){seat=m.seat;code=m.code;toast('חזרת למשחק');return;}
+  if(m.type==='lobby'){ if(seat===0&&!m.canStart){document.getElementById('lobbyStatus').textContent=t('waiting');} return; }
+  if(m.type==='opponent_left'){toast(terr(m.msg)||t('oppLeft'));setTimeout(()=>location.reload(),1800);return;}
+  if(m.type==='opponent_wait'){toast(terr(m.msg));return;}
+  if(m.type==='opponent_back'){toast(t('oppBack'));return;}
+  if(m.type==='resumed'){seat=m.seat;code=m.code;toast(t('backInGame'));return;}
   if(m.type==='state'){state=m.state;selected=null;burnArmed=false;render();return;}
 }
 
@@ -414,7 +580,7 @@ function cardHTML(c,o={}){
   const red=SUITS_RED.has(c.suit)?'red':'';
   const cls=[red,o.mini?'mini':'',o.tiny?'tiny':'',o.sel?'sel':'',o.burnable?'burnable':''].join(' ');
   const click=o.click?`onclick="${o.click}"`:'';
-  const badge=o.hidden?`<span class="hidbadge" title="מוסתר מהיריב">${EYE_OFF}</span>`:'';
+  const badge=o.hidden?`<span class="hidbadge">${EYE_OFF}</span>`:'';
   const R=rankLabel(c.rank), S=c.suit;
   return `<div class="card ${cls}" ${click}>${badge}
     <div class="corner"><b>${R}</b><i>${S}</i></div>
@@ -426,28 +592,30 @@ function render(){
   if(state.over){renderEnd();return;}
   show('game');
   const me=state.me, opp=state.opp;
-  document.getElementById('curName').textContent = state.names[state.turn];
+  document.getElementById('curName').textContent = pname(state.names[state.turn]);
   document.getElementById('deckCount').textContent = state.deckCount;
-  document.getElementById('meName').textContent = me.name;
-  document.getElementById('oppName').textContent = opp.name+' (יריב)';
+  document.getElementById('meName').textContent = pname(me.name);
+  document.getElementById('oppName').textContent = pname(opp.name)+' '+t('oppSuffix');
   document.getElementById('oppHandCount').textContent = opp.handCount;
 
   const sp=document.getElementById('seriesPill');
   if(state.series && state.series.games>0){
     const you=state.you, w=state.series.wins;
-    sp.style.display=''; sp.innerHTML='סדרה: <b>'+w[you]+'–'+w[1-you]+'</b>';
+    sp.style.display=''; sp.innerHTML=t('seriesLabel')+' <b>'+w[you]+'–'+w[1-you]+'</b>';
   } else sp.style.display='none';
 
   document.getElementById('oppCols').innerHTML = opp.columns.map((col,i)=>{
     const cards=col.map(c=>cardHTML(c,{mini:true})).join('');
-    return `<div class="col ${col.length>=5?'full':''}"><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
+    return `<div class="col ${col.length>=5?'full':''}"><div class="lbl">${t('colWord')} ${i+1} · ${col.length}/5</div>${cards}</div>`;
   }).join('');
 
   const my=state.yourTurn;
+  if(my && lastMyTurn===false) playSound('turn');
+  lastMyTurn=my;
   document.getElementById('myCols').innerHTML = me.columns.map((col,i)=>{
     const cards=col.map((c,ci)=>cardHTML(c,{mini:true,hidden:ci===4})).join('');
     const full=col.length>=5, canPlace=!full&&my&&selected;
-    return `<div class="col ${full?'full':''} ${canPlace?'place':''}" ${canPlace?`onclick="place(${i})"`:''}><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
+    return `<div class="col ${full?'full':''} ${canPlace?'place':''}" ${canPlace?`onclick="place(${i})"`:''}><div class="lbl">${t('colWord')} ${i+1} · ${col.length}/5</div>${cards}</div>`;
   }).join('');
 
   document.getElementById('myHand').innerHTML = sortHand(me.hand,handSortMode).map(c=>cardHTML(c,{
@@ -456,16 +624,17 @@ function render(){
 
   const bb=document.getElementById('burnBtn');
   bb.disabled=!my||me.burnedUsed;
-  bb.textContent=me.burnedUsed?'🔥 שריפה נוצלה':(burnArmed?'🔥 בחרו קלף (ביטול)':'🔥 שריפה (פעם אחת)');
+  bb.textContent=me.burnedUsed?t('burnUsed'):(burnArmed?t('burnCancel'):t('burn'));
+  const sortB=document.getElementById('sortBtn'); sortB.textContent = handSortMode==='rank'? t('sortByRank'): t('sortByRun');
 
-  document.getElementById('thinking').textContent = my?'':'תור היריב…';
+  document.getElementById('thinking').textContent = my?'':t('thinkingOpp');
   let hint='';
-  if(!my)hint='ממתין ליריב…';
+  if(!my)hint=t('hintWaiting');
   else{
-    if(state.justDrawnId){const d=me.hand.find(c=>c.id===state.justDrawnId);if(d)hint=`משכת: ${rankLabel(d.rank)}${d.suit}. `;}
-    if(burnArmed)hint+='לחצו על קלף כדי לזרוק ולמשוך חדש.';
-    else if(selected)hint+='עכשיו לחצו על טור להורדה.';
-    else hint+='בחרו קלף מהיד.';
+    if(state.justDrawnId){const d=me.hand.find(c=>c.id===state.justDrawnId);if(d)hint=t('hintDrew')+`${rankLabel(d.rank)}${d.suit}. `;}
+    if(burnArmed)hint+=t('hintBurn');
+    else if(selected)hint+=t('hintPlace');
+    else hint+=t('hintPick');
   }
   document.getElementById('hint').textContent=hint;
   startCountdown();
@@ -487,14 +656,14 @@ function startCountdown(){
 /* ---------- actions ---------- */
 function selectCard(id){
   if(!state.yourTurn)return;
-  if(burnArmed){ if(!state.me.burnedUsed) sendWs({type:'move',action:'burn',cardId:id}); burnArmed=false; return; }
-  selected=(selected===id)?null:id; render();
+  if(burnArmed){ if(!state.me.burnedUsed){ sendWs({type:'move',action:'burn',cardId:id}); playSound('burn'); } burnArmed=false; return; }
+  selected=(selected===id)?null:id; if(selected) playSound('select'); render();
 }
 function armBurn(){ if(!state.yourTurn||state.me.burnedUsed)return; burnArmed=!burnArmed; selected=null; render(); }
 function place(col){
   if(!state.yourTurn||selected==null)return;
   sendWs({type:'move',action:'place',cardId:selected,col});
-  selected=null;
+  playSound('place'); selected=null;
 }
 
 /* ---------- series scoreboard ---------- */
@@ -502,19 +671,19 @@ function renderSeriesBoard(){
   const el=document.getElementById('seriesBoard');
   const s=state.series;
   if(!s || !s.games){ el.innerHTML=''; return; }
-  const n0=s.names[0], n1=s.names[1];
-  const modeLabel = s.mode==='majority' ? 'רוב הידיים' : 'ניקוד מצטבר';
+  const n0=pname(s.names[0]), n1=pname(s.names[1]);
+  const modeLabel = s.mode==='majority' ? t('detailMajority') : t('detailPoints');
   let records='';
-  if(s.bestHand) records+=`יד הכי טובה בסדרה: <b>${s.bestHand.name}</b> (${s.bestHand.player})<br>`;
-  if(s.topGame) records+=`שיא נקודות במשחק: <b>${s.topGame.value}</b> (${s.topGame.player})`;
+  if(s.bestHand) records+=`${t('bestHandLabel')} <b>${handNameL(s.bestHand.name)}</b> (${pname(s.bestHand.player)})<br>`;
+  if(s.topGame) records+=`${t('topGameLabel')} <b>${s.topGame.value}</b> (${pname(s.topGame.player)})`;
   el.innerHTML=`<div class="series-board">
-    <div class="sb-title">סדרה · משחק #${s.games} · ${modeLabel}</div>
+    <div class="sb-title">${t('seriesGame')}${s.games} · ${modeLabel}</div>
     <div class="sb-score">
       <div class="sb-side"><b>${n0}</b><div class="sb-w">${s.wins[0]}</div></div>
-      <div class="sb-vs">ניצחונות</div>
+      <div class="sb-vs">${t('wins')}</div>
       <div class="sb-side"><b>${n1}</b><div class="sb-w">${s.wins[1]}</div></div>
     </div>
-    <div class="sb-line">נקודות מצטברות: ${n0} ${s.points[0]} · ${n1} ${s.points[1]}</div>
+    <div class="sb-line">${t('totalPoints')} ${n0} ${s.points[0]} · ${n1} ${s.points[1]}</div>
     ${records?`<div class="sb-records">${records}</div>`:''}
   </div>`;
 }
@@ -525,29 +694,34 @@ function renderEnd(){
   const r=state.result, names=state.names;
   const win=r.winner;
   let detail = r.mode==='majority'
-    ? `רוב הידיים — ${names[0]}: ${r.wins[0]} · ${names[1]}: ${r.wins[1]}`+(r.ties?` · תיקו: ${r.ties}`:'')
-    : `ניקוד מצטבר — ${names[0]}: ${r.points[0]} · ${names[1]}: ${r.points[1]}`;
+    ? `${t('detailMajority')} — ${pname(names[0])}: ${r.wins[0]} · ${pname(names[1])}: ${r.wins[1]}`+(r.ties?` · ${t('tiesLabel')} ${r.ties}`:'')
+    : `${t('detailPoints')} — ${pname(names[0])}: ${r.points[0]} · ${pname(names[1])}: ${r.points[1]}`;
   const youWon = win===seat;
   renderSeriesBoard();
-  // banner appears after all rows have revealed
   const bannerDelay = (0.1 + r.rows.length*0.32 + 0.2).toFixed(2);
   const banner=document.getElementById('banner');
   banner.style.animationDelay = bannerDelay+'s';
-  banner.innerHTML=(win===-1?'תיקו!':(youWon?'🏆 ניצחת!':`${names[win]} ניצח`))+`<small>${detail}</small>`;
+  banner.innerHTML=(win===-1?t('draw'):(youWon?t('youWin'):`${pname(names[win])} ${t('winsSuffix')}`))+`<small>${detail}</small>`;
+  banner.classList.toggle('win-glow', youWon && win!==-1);
+  if(win===-1){} else if(youWon){ playSound('win'); confetti(); } else { playSound('lose'); }
 
   document.getElementById('matchups').innerHTML=
     `<div class="matchup" style="--d:0s;background:transparent;border:none;padding-bottom:0">
-       <div class="side" style="text-align:center;font-weight:800;color:var(--gold)">${names[0]}</div>
+       <div class="side" style="text-align:center;font-weight:800;color:var(--gold)">${pname(names[0])}</div>
        <div class="vs"></div>
-       <div class="side" style="text-align:center;font-weight:800;color:var(--gold)">${names[1]}</div></div>`+
+       <div class="side" style="text-align:center;font-weight:800;color:var(--gold)">${pname(names[1])}</div></div>`+
     r.rows.map((row,i)=>{
       const d=(0.1 + i*0.32).toFixed(2);
+      const label = i<4 ? `${t('colWord')} ${i+1}` : t('handWord');
       return `<div class="matchup" style="--d:${d}s">
-      <div class="side ${row.winner===0?'win':''}"><div class="mini-cards">${row.a.cards.map(c=>cardHTML(c,{tiny:true})).join('')}</div><div class="handname">${row.a.name}</div></div>
-      <div class="vs">${row.label}${row.winner===-1?'<br>תיקו':''}</div>
-      <div class="side ${row.winner===1?'win':''}"><div class="mini-cards">${row.b.cards.map(c=>cardHTML(c,{tiny:true})).join('')}</div><div class="handname">${row.b.name}</div></div>
+      <div class="side ${row.winner===0?'win':''}"><div class="mini-cards">${row.a.cards.map(c=>cardHTML(c,{tiny:true})).join('')}</div><div class="handname">${handNameL(row.a.name)}</div></div>
+      <div class="vs">${label}${row.winner===-1?'<br>'+t('rowTie'):''}</div>
+      <div class="side ${row.winner===1?'win':''}"><div class="mini-cards">${row.b.cards.map(c=>cardHTML(c,{tiny:true})).join('')}</div><div class="handname">${handNameL(row.b.name)}</div></div>
     </div>`;}).join('');
 }
+
+/* init language */
+setLang(lang);
 </script>
 </body>
 </html>
