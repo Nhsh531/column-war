@@ -38,6 +38,8 @@
     padding:14px;cursor:pointer;text-align:center;min-height:56px;display:flex;align-items:center;justify-content:center;font-weight:700}
   .opt small{display:block;color:var(--muted);font-weight:600;font-size:12px;margin-top:3px}
   .opt.sel{border-color:var(--gold);background:#1b3524}
+  .opt.sm{flex:1 1 28%;min-width:70px;padding:11px 6px;font-size:14px;font-weight:700}
+  .row.grid5{gap:7px}
   .lbl-cap{color:var(--muted);font-size:13px;margin-bottom:9px;font-family:"Fredoka",sans-serif}
   input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:12px;
     padding:12px;font-size:16px;width:100%;font-family:inherit}
@@ -72,6 +74,12 @@
   .card.back{background:repeating-linear-gradient(45deg,#1d5f80,#1d5f80 7px,#164a63 7px,#164a63 14px);
     border:2px solid #2f7ba1}
   .card.mini{max-width:44px}.card.tiny{max-width:38px}
+  .card .hidbadge{position:absolute;top:-5px;left:-5px;width:17px;height:17px;background:var(--gold);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.55);z-index:2}
+  .card .hidbadge svg{width:11px;height:11px;stroke:#2b1e00;fill:none;stroke-width:2}
+  .hidnote{font-size:11.5px;color:#cfe9de;text-align:center;margin-top:9px;display:flex;align-items:center;
+    justify-content:center;gap:6px;font-weight:700;opacity:.92}
+  .hidnote svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;flex:none}
   .hand{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
   .hand .card{max-width:60px;cursor:pointer}
   .hand .card.sel{outline:3px solid var(--gold);transform:translateY(-8px)}
@@ -96,11 +104,14 @@
   @keyframes rowIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
   @keyframes cardReveal{from{transform:rotateY(90deg);opacity:.15}to{transform:rotateY(0);opacity:1}}
   @keyframes bannerIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
-  #end .matchup{opacity:0;animation:rowIn .45s cubic-bezier(.2,.7,.3,1) forwards;animation-delay:var(--d,0s)}
-  #end .matchup .mini-cards .card{animation:cardReveal .5s ease backwards;animation-delay:var(--d,0s)}
-  #banner{opacity:0;animation:bannerIn .5s ease forwards}
+  #end .matchup{animation:rowIn .45s cubic-bezier(.2,.7,.3,1) both;animation-delay:var(--d,0s)}
+  #end .matchup .mini-cards .card{animation:cardReveal .5s ease both;animation-delay:var(--d,0s)}
+  #banner{animation:bannerIn .5s ease both}
   @media (max-width:380px){.card,.hand .card{max-width:52px}.col{min-height:88px}}
-  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    #end .matchup,#end .card,#banner{opacity:1!important;transform:none!important}
+  }
 </style>
 </head>
 <body>
@@ -121,16 +132,19 @@
         <div class="opt sel" data-mode="majority">רוב הידיים<small>הכי הרבה טורים</small></div>
         <div class="opt" data-mode="points">ניקוד מצטבר<small>סכום החוזק</small></div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <div class="opt" data-t="10">10 שנ׳</div>
-        <div class="opt sel" data-t="20">20 שנ׳</div>
-        <div class="opt" data-t="30">30 שנ׳</div>
+      <div class="lbl-cap" style="margin-top:14px">זמן לתור</div>
+      <div class="row grid5" style="margin-top:2px">
+        <div class="opt sm" data-t="10">10 שנ׳</div>
+        <div class="opt sm sel" data-t="20">20 שנ׳</div>
+        <div class="opt sm" data-t="30">30 שנ׳</div>
+        <div class="opt sm" data-t="60">דקה</div>
+        <div class="opt sm" data-t="120">2 דק׳</div>
       </div>
       <div class="lbl-cap" style="margin-top:14px">רמת המחשב (למשחק נגד המחשב)</div>
       <div class="row" id="diffOpts">
-        <div class="opt" data-diff="easy">קל</div>
-        <div class="opt sel" data-diff="medium">בינוני</div>
-        <div class="opt" data-diff="hard">קשה</div>
+        <div class="opt sm" data-diff="easy">קל</div>
+        <div class="opt sm sel" data-diff="medium">בינוני</div>
+        <div class="opt sm" data-diff="hard">קשה</div>
       </div>
       <button class="big" style="margin-top:14px" onclick="createRoom()">צור חדר וקבל קוד</button>
       <button class="big ghost" style="margin-top:10px" onclick="soloGame()">🤖 שחק נגד המחשב</button>
@@ -170,6 +184,7 @@
     <div class="felt">
       <h3><span id="meName"></span> <span class="tag">הטורים שלך</span></h3>
       <div class="cols" id="myCols"></div>
+      <div class="hidnote"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg> הקלף החמישי בכל טור (המסומן) מוסתר מהיריב</div>
     </div>
     <div class="panel" style="margin:9px 0">
       <div class="row" style="justify-content:space-between;margin-bottom:4px">
@@ -194,6 +209,7 @@
 const SUITS_RED=new Set(['♥','♦']);
 const RANK_LABEL={11:'J',12:'Q',13:'K',14:'A'};
 const rankLabel=r=>RANK_LABEL[r]||String(r);
+const EYE_OFF='<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg>';
 
 let ws=null, seat=null, state=null, selected=null, burnArmed=false, code=null, timerInt=null;
 
@@ -283,7 +299,8 @@ function cardHTML(c,o={}){
   const red=SUITS_RED.has(c.suit)?'red':'';
   const cls=[red,o.mini?'mini':'',o.tiny?'tiny':'',o.sel?'sel':'',o.burnable?'burnable':''].join(' ');
   const click=o.click?`onclick="${o.click}"`:'';
-  return `<div class="card ${cls}" ${click}>
+  const badge=o.hidden?`<span class="hidbadge" title="מוסתר מהיריב">${EYE_OFF}</span>`:'';
+  return `<div class="card ${cls}" ${click}>${badge}
     <div class="r">${rankLabel(c.rank)}${c.suit}</div><div class="s">${c.suit}</div>
     <div class="r b">${rankLabel(c.rank)}${c.suit}</div></div>`;
 }
@@ -305,7 +322,7 @@ function render(){
 
   const my=state.yourTurn;
   document.getElementById('myCols').innerHTML = me.columns.map((col,i)=>{
-    const cards=col.map(c=>cardHTML(c,{mini:true})).join('');
+    const cards=col.map((c,ci)=>cardHTML(c,{mini:true,hidden:ci===4})).join('');
     const full=col.length>=5, canPlace=!full&&my&&selected;
     return `<div class="col ${full?'full':''} ${canPlace?'place':''}" ${canPlace?`onclick="place(${i})"`:''}><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
   }).join('');
@@ -336,7 +353,8 @@ function startCountdown(){
   function tick(){
     if(!state||state.over||state.turnEndsAt==null){lbl.textContent='—';fill.style.width='0%';return;}
     const left=Math.max(0,(state.turnEndsAt-Date.now())/1000);
-    lbl.textContent=Math.ceil(left);
+    const s=Math.ceil(left);
+    lbl.textContent = s>=60 ? (Math.floor(s/60)+':'+String(s%60).padStart(2,'0')) : s;
     fill.style.width=Math.min(100,left/state.timerLen*100)+'%';
     bar.classList.toggle('low',left<=5);
   }

@@ -77,7 +77,7 @@ function createGame(mode, timerLen) {
   for (let k = 0; k < 6; k++) { players[0].hand.push(deck.pop()); players[1].hand.push(deck.pop()); }
   return {
     mode: (mode === 'points' ? 'points' : 'majority'),
-    timerLen: [10, 20, 30].includes(timerLen) ? timerLen : 20,
+    timerLen: [10, 20, 30, 60, 120].includes(timerLen) ? timerLen : 20,
     deck, discard: [], players,
     turn: 0, started: true, over: false,
     justDrawn: [null, null], turnEndsAt: null, result: null,
