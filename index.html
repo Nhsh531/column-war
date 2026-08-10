@@ -173,6 +173,9 @@
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     #end .matchup,#end .card,#banner{opacity:1!important;transform:none!important}
+    /* keep the win celebration even when motion is reduced */
+    .confetti i{animation:conf 2.6s linear forwards!important}
+    #banner.win-glow{animation:winGlow 1.4s ease-in-out infinite!important}
   }
 </style>
 </head>
@@ -315,7 +318,7 @@ const I18N={
     diffEasy:'קל', diffMedium:'בינוני', diffHard:'קשה', diffVeryhard:'קשה מאוד',
     joinRoom:'הצטרפות לחדר קיים', joinBtn:'הצטרף',
     howToPlay:'📖 איך משחקים', howToTitle:'איך משחקים', back:'חזרה',
-    version:'מלחמת טורים · גרסה 2.2',
+    version:'מלחמת טורים · גרסה 2.3',
     shareCodeMsg:'שתפו את הקוד עם החבר/ה כדי שיצטרפו:', shareLink:'שתף קישור למשחק', copyCode:'העתק קוד בלבד', waiting:'ממתין לשחקן שני…',
     turnLabel:'תור:', deckLabel:'קופה:', seriesLabel:'סדרה:', handShort:'יד:', yourColumns:'הטורים שלך',
     oppSuffix:'(יריב)', colWord:'טור', handWord:'היד',
@@ -357,7 +360,7 @@ const I18N={
     diffEasy:'Easy', diffMedium:'Medium', diffHard:'Hard', diffVeryhard:'Very hard',
     joinRoom:'Join a room', joinBtn:'Join',
     howToPlay:'📖 How to play', howToTitle:'How to play', back:'Back',
-    version:'Column War · v2.2',
+    version:'Column War · v2.3',
     shareCodeMsg:'Share this code with a friend to join:', shareLink:'Share game link', copyCode:'Copy code only', waiting:'Waiting for a second player…',
     turnLabel:'Turn:', deckLabel:'Deck:', seriesLabel:'Series:', handShort:'Hand:', yourColumns:'Your columns',
     oppSuffix:'(opponent)', colWord:'Col', handWord:'Hand',
@@ -447,7 +450,6 @@ function toggleSound(){
   if(soundOn){ initAudio(); playSound('select'); }
 }
 function confetti(){
-  if(REDUCED) return;
   const colors=['#e7b64b','#57c98a','#ffffff','#e04b57','#4db8e0'];
   const box=document.createElement('div'); box.className='confetti';
   for(let i=0;i<60;i++){ const p=document.createElement('i');
