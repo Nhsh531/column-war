@@ -151,12 +151,9 @@
   .sb-records b{color:var(--gold)}
   .toast{position:fixed;top:calc(10px + var(--safe-t));left:50%;transform:translateX(-50%);background:var(--red);
     color:#fff;padding:10px 18px;border-radius:12px;font-weight:700;z-index:99;box-shadow:var(--shadow);display:none;max-width:92%;text-align:center}
-  /* win animation: confetti + banner glow */
-  .confetti{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
-  .confetti i{position:absolute;top:-16px;width:9px;height:14px;border-radius:2px;opacity:.95;animation:conf 2.6s linear forwards}
-  @keyframes conf{0%{transform:translateY(-16px) rotate(0)}100%{transform:translateY(110vh) rotate(700deg)}}
+  /* win banner glow (confetti is drawn on a canvas from JS) */
   #banner.win-glow{animation:bannerIn .5s ease both, winGlow 1.4s ease-in-out .5s infinite}
-  @keyframes winGlow{0%,100%{box-shadow:0 0 0 rgba(231,182,75,0)}50%{box-shadow:0 0 26px rgba(231,182,75,.6)}}
+  @keyframes winGlow{0%,100%{box-shadow:0 0 0 rgba(231,182,75,0)}50%{box-shadow:0 0 30px rgba(231,182,75,.65)}}
   /* how-to-play */
   .howto h2{font-size:20px;text-align:center;margin:6px 0 10px}
   .howto .panel p{line-height:1.75;font-size:14.5px;margin:0 0 10px}
@@ -173,8 +170,6 @@
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     #end .matchup,#end .card,#banner{opacity:1!important;transform:none!important}
-    /* keep the win celebration even when motion is reduced */
-    .confetti i{animation:conf 2.6s linear forwards!important}
     #banner.win-glow{animation:winGlow 1.4s ease-in-out infinite!important}
   }
 </style>
@@ -318,7 +313,7 @@ const I18N={
     diffEasy:'קל', diffMedium:'בינוני', diffHard:'קשה', diffVeryhard:'קשה מאוד',
     joinRoom:'הצטרפות לחדר קיים', joinBtn:'הצטרף',
     howToPlay:'📖 איך משחקים', howToTitle:'איך משחקים', back:'חזרה',
-    version:'מלחמת טורים · גרסה 2.3',
+    version:'מלחמת טורים · גרסה 2.4',
     shareCodeMsg:'שתפו את הקוד עם החבר/ה כדי שיצטרפו:', shareLink:'שתף קישור למשחק', copyCode:'העתק קוד בלבד', waiting:'ממתין לשחקן שני…',
     turnLabel:'תור:', deckLabel:'קופה:', seriesLabel:'סדרה:', handShort:'יד:', yourColumns:'הטורים שלך',
     oppSuffix:'(יריב)', colWord:'טור', handWord:'היד',
@@ -360,7 +355,7 @@ const I18N={
     diffEasy:'Easy', diffMedium:'Medium', diffHard:'Hard', diffVeryhard:'Very hard',
     joinRoom:'Join a room', joinBtn:'Join',
     howToPlay:'📖 How to play', howToTitle:'How to play', back:'Back',
-    version:'Column War · v2.3',
+    version:'Column War · v2.4',
     shareCodeMsg:'Share this code with a friend to join:', shareLink:'Share game link', copyCode:'Copy code only', waiting:'Waiting for a second player…',
     turnLabel:'Turn:', deckLabel:'Deck:', seriesLabel:'Series:', handShort:'Hand:', yourColumns:'Your columns',
     oppSuffix:'(opponent)', colWord:'Col', handWord:'Hand',
@@ -450,15 +445,47 @@ function toggleSound(){
   if(soundOn){ initAudio(); playSound('select'); }
 }
 function confetti(){
-  const colors=['#e7b64b','#57c98a','#ffffff','#e04b57','#4db8e0'];
-  const box=document.createElement('div'); box.className='confetti';
-  for(let i=0;i<60;i++){ const p=document.createElement('i');
-    p.style.left=(Math.random()*100)+'%'; p.style.background=colors[i%colors.length];
-    p.style.animationDelay=(Math.random()*0.7).toFixed(2)+'s';
-    p.style.animationDuration=(2.1+Math.random()*1.2).toFixed(2)+'s';
-    box.appendChild(p); }
-  document.body.appendChild(box);
-  setTimeout(()=>box.remove(),4200);
+  const W=window.innerWidth, H=window.innerHeight;
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const cv=document.createElement('canvas');
+  cv.style.cssText='position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:200';
+  cv.width=Math.floor(W*dpr); cv.height=Math.floor(H*dpr);
+  document.body.appendChild(cv);
+  const ctx=cv.getContext('2d'); ctx.scale(dpr,dpr);
+  const colors=['#e7b64b','#f2b134','#57c98a','#ffffff','#e04b57','#4db8e0','#b08bff'];
+  const P=[];
+  function burst(x,y,n,ang,spread,pow){
+    for(let i=0;i<n;i++){
+      const a=ang+(Math.random()-0.5)*spread, v=pow*(0.55+Math.random()*0.75);
+      const strip=Math.random()<0.25;
+      P.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:0.17+Math.random()*0.07,drag:0.986,
+        rot:Math.random()*6.28,vr:(Math.random()-0.5)*0.38,
+        w:strip?3+Math.random()*2:6+Math.random()*6, h:strip?12+Math.random()*8:7+Math.random()*7,
+        color:colors[(Math.random()*colors.length)|0], round:Math.random()<0.28,
+        life:0, ttl:150+Math.random()*80, op:1});
+    }
+  }
+  const pow=Math.max(13, H*0.02);
+  burst(W*0.14, H*0.98, 55, -Math.PI/2+0.35, 0.6, pow);
+  burst(W*0.86, H*0.98, 55, -Math.PI/2-0.35, 0.6, pow);
+  setTimeout(()=>{ if(document.body.contains(cv)) burst(W*0.5, H*0.42, 55, -Math.PI/2, 6.28, pow*0.6); },260);
+  let raf, frames=0;
+  function step(){
+    frames++; ctx.clearRect(0,0,W,H); let alive=false;
+    for(const p of P){
+      p.vx*=p.drag; p.vy=p.vy*p.drag+p.g; p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life++;
+      if(p.life>p.ttl) p.op-=0.025;
+      if(p.op<=0 || p.y>H+40) continue;
+      alive=true;
+      ctx.save(); ctx.globalAlpha=Math.max(0,p.op); ctx.translate(p.x,p.y); ctx.rotate(p.rot); ctx.fillStyle=p.color;
+      if(p.round){ ctx.beginPath(); ctx.arc(0,0,p.w/2,0,6.28); ctx.fill(); }
+      else ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    }
+    if(alive && frames<340) raf=requestAnimationFrame(step);
+    else { cancelAnimationFrame(raf); cv.remove(); }
+  }
+  raf=requestAnimationFrame(step);
 }
 
 /* hand sorting (like online Rummy): by rank (777) or by run/suit (789) */
