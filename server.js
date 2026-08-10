@@ -46,16 +46,32 @@ function armTimer(room) {
     if (!room.game || room.game.over) return;
     core.autoMove(room.game);
     broadcastState(room);
-    if (room.game.over) { clearTimer(room); return; }
-    armTimer(room);
+    progress(room);
   }, ms + 50);
+}
+
+/* decide what happens after a state change: bot plays, or human timer arms */
+function progress(room) {
+  if (!room.game) return;
+  if (room.game.over) { clearTimer(room); return; }
+  if (room.bot && room.game.turn === 1) {
+    clearTimer(room);
+    room.timer = setTimeout(() => {
+      if (!room.game || room.game.over) return;
+      core.botMove(room.game, room.difficulty);
+      broadcastState(room);
+      progress(room);
+    }, 700);
+  } else {
+    armTimer(room);
+  }
 }
 
 function startGame(room) {
   room.game = core.createGame(room.mode, room.timerLen);
   core.startTurn(room.game);
   broadcastState(room);
-  armTimer(room);
+  progress(room);
 }
 
 wss.on('connection', (ws) => {
@@ -83,6 +99,24 @@ wss.on('connection', (ws) => {
       return;
     }
 
+    if (msg.type === 'solo') {
+      const code = makeCode();
+      const room = {
+        code,
+        mode: msg.mode || 'majority',
+        timerLen: msg.timer || 20,
+        names: [(msg.name || 'שחקן').slice(0, 16), 'המחשב'],
+        sockets: [ws, null],
+        game: null, timer: null, bot: true,
+        difficulty: ['easy', 'medium', 'hard'].includes(msg.difficulty) ? msg.difficulty : 'medium',
+      };
+      rooms.set(code, room);
+      ws.room = code; ws.seat = 0;
+      send(ws, { type: 'created', code, seat: 0, solo: true });
+      startGame(room);
+      return;
+    }
+
     if (msg.type === 'join') {
       const code = (msg.code || '').toUpperCase().trim();
       const room = rooms.get(code);
@@ -107,13 +141,15 @@ wss.on('connection', (ws) => {
       else return;
       if (!res.ok) { send(ws, { type: 'error', msg: res.error }); return; }
       broadcastState(room);
-      if (room.game.over) clearTimer(room); else armTimer(room);
+      progress(room);
       return;
     }
 
     if (msg.type === 'rematch') {
       const room = rooms.get(ws.room);
-      if (!room || !room.sockets[0] || !room.sockets[1]) return;
+      if (!room) return;
+      // PvP needs both players; solo just needs the human
+      if (room.bot ? !room.sockets[0] : (!room.sockets[0] || !room.sockets[1])) return;
       startGame(room);
       return;
     }

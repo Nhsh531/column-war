@@ -201,7 +201,79 @@ function view(g, player, names) {
   };
 }
 
+/* ============================================================
+   בוט — יריב מחשב (אותה היוריסטיקה כמו בגרסה המקומית)
+   מניח שכבר נמשך קלף בתחילת התור (startTurn), רק שורף-אולי + מוריד
+   ============================================================ */
+function synergy(card, col) {
+  let s = 0;
+  for (const e of col) {
+    if (e.rank === card.rank) s += 32;
+    if (e.suit === card.suit) s += 9;
+    const d = Math.abs(e.rank - card.rank);
+    if (d === 1) s += 7; else if (d <= 4) s += 3;
+  }
+  return s;
+}
+function keepValue(card, p) {
+  let v = card.rank * 0.35;
+  for (const e of p.hand) {
+    if (e.id !== card.id && e.rank === card.rank) v += 6;
+    if (e.id !== card.id && e.suit === card.suit) v += 1;
+  }
+  return v * 0.4;
+}
+function leastUseful(p) {
+  let worst = null;
+  for (const card of p.hand) {
+    let best = 0;
+    for (const col of p.columns) if (col.length < 5) best = Math.max(best, synergy(card, col));
+    best += keepValue(card, p);
+    if (!worst || best < worst.score) worst = { id: card.id, score: best };
+  }
+  return worst;
+}
+function botMove(g, difficulty = 'medium') {
+  if (g.over) return;
+  const player = g.turn;
+  const p = g.players[player];
+  const open = p.columns.map((c, i) => i).filter(i => p.columns[i].length < 5);
+  if (!open.length || !p.hand.length) return;
+
+  // EASY: random placement, never burns — a beatable opponent
+  if (difficulty === 'easy') {
+    const card = p.hand[Math.floor(Math.random() * p.hand.length)];
+    const ci = open[Math.floor(Math.random() * open.length)];
+    place(g, player, card.id, ci);
+    return;
+  }
+
+  // MEDIUM / HARD: optional one-time burn of the least useful card
+  if (!p.burnedUsed && g.deck.length > 6) {
+    const worst = leastUseful(p);
+    const thresh = difficulty === 'hard' ? 6 : 4;
+    if (worst && worst.score < thresh) burn(g, player, worst.id);
+  }
+
+  // score every (card, column) by synergy, keeping strong cards in hand
+  const options = [];
+  for (const card of p.hand) {
+    for (const ci of open) {
+      options.push({ cardId: card.id, ci, s: synergy(card, p.columns[ci]) - keepValue(card, p) });
+    }
+  }
+  options.sort((a, b) => b.s - a.s);
+
+  // HARD always takes the best move; MEDIUM picks from the top few (some slack)
+  let pick;
+  if (difficulty === 'hard') pick = options[0];
+  else { const top = options.slice(0, Math.min(3, options.length)); pick = top[Math.floor(Math.random() * top.length)]; }
+
+  if (pick) place(g, player, pick.cardId, pick.ci);
+  else place(g, player, p.hand[0].id, open[0]); // fallback
+}
+
 module.exports = {
-  createGame, startTurn, place, burn, autoMove, finish, view, allFull,
+  createGame, startTurn, place, burn, autoMove, botMove, finish, view, allFull,
   evaluate5, handName, rankLabel, RED,
 };
