@@ -77,10 +77,14 @@
   .timerbar>i{display:block;height:100%;background:var(--gold);transition:width .3s linear}
   .timerbar.low>i{background:var(--red)}
   .thinking{text-align:center;color:var(--gold);font-family:"Fredoka";font-size:15px;padding:6px;min-height:22px}
-  .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
-  .col{background:rgba(0,0,0,.16);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:5px;
-    min-height:96px;display:flex;flex-direction:column;gap:3px;transition:border-color .15s,box-shadow .15s}
-  .col .lbl{font-size:10px;color:#bfe0d3;text-align:center;font-weight:700}
+  .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .col{background:rgba(0,0,0,.18);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;
+    padding:4px 3px 6px;display:flex;flex-direction:column;align-items:center;min-height:0;
+    transition:border-color .15s,box-shadow .15s}
+  .col .lbl{font-size:9.5px;color:#bfe0d3;text-align:center;font-weight:700;margin-bottom:4px;letter-spacing:-.2px}
+  /* cards in a column overlap vertically so both boards fit on one screen */
+  .col .card{margin:0 auto}
+  .col .card + .card{margin-top:-34px}
   .col.place{cursor:pointer}
   .col.place:hover,.col.place:active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(231,182,75,.35) inset}
   .col.full{border-color:rgba(231,182,75,.3)}
@@ -98,8 +102,13 @@
     font-size:25px;opacity:.9;pointer-events:none}
   .card.back{background:repeating-linear-gradient(45deg,#1d5f80,#1d5f80 7px,#164a63 7px,#164a63 14px);
     border:2px solid #2f7ba1;box-shadow:inset 0 0 0 3px rgba(255,255,255,.06),0 3px 7px rgba(0,0,0,.4)}
-  .card.mini{max-width:46px;border-radius:7px;padding:3px 4px}
-  .card.mini .corner b{font-size:11px}.card.mini .corner i{font-size:9px}.card.mini .pip{font-size:19px}
+  /* board cards: compact + a clear centered index in the exposed strip */
+  .card.mini{max-width:41px;border-radius:6px;padding:2px 3px;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+  .card.mini .corner{flex-direction:row;gap:1px;align-items:baseline;align-self:center}
+  .card.mini .corner b{font-size:14px;font-weight:800;letter-spacing:-.5px}
+  .card.mini .corner i{font-size:11px}
+  .card.mini .corner.br{display:none}
+  .card.mini .pip{font-size:16px;opacity:.5}
   .card.tiny{max-width:40px;border-radius:6px}
   .card.tiny .corner b{font-size:10px}.card.tiny .corner i{font-size:8px}.card.tiny .pip{font-size:16px}
   .card .hidbadge{position:absolute;top:2px;right:2px;width:15px;height:15px;background:var(--gold);
@@ -108,9 +117,14 @@
   .hidnote{font-size:11.5px;color:#cfe9de;text-align:center;margin-top:9px;display:flex;align-items:center;
     justify-content:center;gap:6px;font-weight:700;opacity:.92}
   .hidnote svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:2;flex:none}
-  .hand{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
-  .hand .card{max-width:60px;cursor:pointer}
-  .hand .card.sel{outline:3px solid var(--gold);transform:translateY(-8px)}
+  /* hand as an overlapping fan: bigger cards, all six stay on one row */
+  .hand{display:flex;justify-content:center;margin-top:10px;direction:ltr;padding-top:8px}
+  .hand .card{width:62px;max-width:62px;flex:0 0 auto;margin-left:-16px;cursor:pointer;
+    transition:transform .12s ease}
+  .hand .card:first-child{margin-left:0}
+  .hand .card:hover{transform:translateY(-8px);z-index:6}
+  .hand .card.sel{outline:3px solid var(--gold);transform:translateY(-14px);z-index:7}
+  .hand .card.burnable{outline:3px solid #ff7a3d}
   .hand .card.burnable{outline:3px solid #ff7a3d}
   .hint{font-size:13.5px;color:#dfeee7;text-align:center;margin:6px 2px;min-height:20px;font-weight:600}
   .center{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:20px}
@@ -126,6 +140,16 @@
   .banner{font-family:"Fredoka";font-size:22px;font-weight:600;text-align:center;padding:16px;border-radius:16px;
     background:linear-gradient(160deg,#1b3524,#12251a);border:1px solid var(--gold);margin:6px 0}
   .banner small{display:block;font-size:14px;color:var(--muted);margin-top:6px;font-family:"Nunito";font-weight:700}
+  .series-board{background:linear-gradient(160deg,#16281c,#12212b);border:1px solid var(--gold);border-radius:16px;padding:14px;margin:10px 0}
+  .sb-title{font-family:"Fredoka",sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px}
+  .sb-score{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+  .sb-side{text-align:center}
+  .sb-side b{display:block;font-family:"Fredoka",sans-serif;font-size:14px;color:var(--txt);margin-bottom:2px}
+  .sb-w{font-family:"Fredoka",sans-serif;font-size:32px;font-weight:700;color:var(--gold);line-height:1}
+  .sb-vs{font-size:11px;color:var(--muted);text-align:center}
+  .sb-line{text-align:center;font-size:13px;color:#dfeee7;margin-top:8px;font-weight:700}
+  .sb-records{margin-top:8px;border-top:1px solid rgba(255,255,255,.08);padding-top:9px;font-size:12.5px;color:var(--muted);text-align:center;line-height:1.8}
+  .sb-records b{color:var(--gold)}
   .toast{position:fixed;top:calc(10px + var(--safe-t));left:50%;transform:translateX(-50%);background:var(--red);
     color:#fff;padding:10px 18px;border-radius:12px;font-weight:700;z-index:99;box-shadow:var(--shadow);display:none}
   /* end-screen reveal animation */
@@ -213,6 +237,7 @@
       <div class="pill">תור: <b id="curName"></b></div>
       <div class="pill">קופה: <b id="deckCount"></b></div>
       <div class="pill">⏱ <b id="timeLeft">—</b></div>
+      <div class="pill" id="seriesPill" style="display:none"></div>
     </div>
     <div class="timerbar" id="timerbar"><i id="timerfill"></i></div>
     <div class="thinking" id="thinking"></div>
@@ -225,10 +250,10 @@
       <div class="cols" id="myCols"></div>
       <div class="hidnote"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg> הקלף החמישי בכל טור (המסומן) מוסתר מהיריב</div>
     </div>
-    <div class="panel" style="margin:9px 0">
-      <div class="row" style="justify-content:space-between;margin-bottom:4px">
-        <div class="lbl-cap" style="margin:0">היד שלך</div>
-        <button class="ghost" id="burnBtn" style="min-height:40px;padding:8px 14px;font-size:14px" onclick="armBurn()">🔥 שריפה (פעם אחת)</button>
+    <div class="panel" style="margin:8px 0">
+      <div class="row" style="gap:6px;margin-bottom:6px">
+        <button class="ghost" id="sortBtn" style="flex:1;min-height:42px;padding:8px;font-size:14px" onclick="toggleHandSort()">⇅ סדר: לפי מספר</button>
+        <button class="ghost" id="burnBtn" style="flex:1;min-height:42px;padding:8px;font-size:14px" onclick="armBurn()">🔥 שריפה</button>
       </div>
       <div class="hint" id="hint"></div>
       <div class="hand" id="myHand"></div>
@@ -238,6 +263,7 @@
   <!-- END -->
   <div id="end" class="screen">
     <div id="banner" class="banner"></div>
+    <div id="seriesBoard"></div>
     <div id="matchups"></div>
     <button class="big" style="margin:14px 0 8px" onclick="rematch()">עוד סיבוב</button>
     <button class="big ghost" onclick="location.reload()">יציאה</button>
@@ -249,6 +275,22 @@ const SUITS_RED=new Set(['♥','♦']);
 const RANK_LABEL={11:'J',12:'Q',13:'K',14:'A'};
 const rankLabel=r=>RANK_LABEL[r]||String(r);
 const EYE_OFF='<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.8 9.8 0 0 1 12 5c6 0 9 7 9 7a15 15 0 0 1-2.3 3.2M6.1 6.1A15 15 0 0 0 3 12s3 7 9 7a9.5 9.5 0 0 0 4.3-1"/></svg>';
+
+/* hand sorting (like online Rummy): by rank (777) or by run/suit (789) */
+const SUIT_ORDER={'♠':0,'♥':1,'♣':2,'♦':3};
+let handSortMode='rank';
+function sortHand(cards,mode){
+  const a=cards.slice();
+  if(mode==='run') a.sort((x,y)=> SUIT_ORDER[x.suit]-SUIT_ORDER[y.suit] || x.rank-y.rank);
+  else a.sort((x,y)=> y.rank-x.rank || SUIT_ORDER[x.suit]-SUIT_ORDER[y.suit]);
+  return a;
+}
+function toggleHandSort(){
+  handSortMode = handSortMode==='rank' ? 'run' : 'rank';
+  const b=document.getElementById('sortBtn');
+  if(b) b.textContent = handSortMode==='rank' ? '⇅ סדר: לפי מספר' : '⇅ סדר: לפי סדרה';
+  if(state) render();
+}
 
 let ws=null, seat=null, state=null, selected=null, burnArmed=false, code=null, timerInt=null;
 
@@ -389,6 +431,12 @@ function render(){
   document.getElementById('oppName').textContent = opp.name+' (יריב)';
   document.getElementById('oppHandCount').textContent = opp.handCount;
 
+  const sp=document.getElementById('seriesPill');
+  if(state.series && state.series.games>0){
+    const you=state.you, w=state.series.wins;
+    sp.style.display=''; sp.innerHTML='סדרה: <b>'+w[you]+'–'+w[1-you]+'</b>';
+  } else sp.style.display='none';
+
   document.getElementById('oppCols').innerHTML = opp.columns.map((col,i)=>{
     const cards=col.map(c=>cardHTML(c,{mini:true})).join('');
     return `<div class="col ${col.length>=5?'full':''}"><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
@@ -401,7 +449,7 @@ function render(){
     return `<div class="col ${full?'full':''} ${canPlace?'place':''}" ${canPlace?`onclick="place(${i})"`:''}><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
   }).join('');
 
-  document.getElementById('myHand').innerHTML = me.hand.map(c=>cardHTML(c,{
+  document.getElementById('myHand').innerHTML = sortHand(me.hand,handSortMode).map(c=>cardHTML(c,{
     sel:selected===c.id, burnable:burnArmed&&my, click:my?`selectCard('${c.id}')`:''
   })).join('');
 
@@ -448,6 +496,28 @@ function place(col){
   selected=null;
 }
 
+/* ---------- series scoreboard ---------- */
+function renderSeriesBoard(){
+  const el=document.getElementById('seriesBoard');
+  const s=state.series;
+  if(!s || !s.games){ el.innerHTML=''; return; }
+  const n0=s.names[0], n1=s.names[1];
+  const modeLabel = s.mode==='majority' ? 'רוב הידיים' : 'ניקוד מצטבר';
+  let records='';
+  if(s.bestHand) records+=`יד הכי טובה בסדרה: <b>${s.bestHand.name}</b> (${s.bestHand.player})<br>`;
+  if(s.topGame) records+=`שיא נקודות במשחק: <b>${s.topGame.value}</b> (${s.topGame.player})`;
+  el.innerHTML=`<div class="series-board">
+    <div class="sb-title">סדרה · משחק #${s.games} · ${modeLabel}</div>
+    <div class="sb-score">
+      <div class="sb-side"><b>${n0}</b><div class="sb-w">${s.wins[0]}</div></div>
+      <div class="sb-vs">ניצחונות</div>
+      <div class="sb-side"><b>${n1}</b><div class="sb-w">${s.wins[1]}</div></div>
+    </div>
+    <div class="sb-line">נקודות מצטברות: ${n0} ${s.points[0]} · ${n1} ${s.points[1]}</div>
+    ${records?`<div class="sb-records">${records}</div>`:''}
+  </div>`;
+}
+
 /* ---------- end ---------- */
 function renderEnd(){
   show('end');clearInterval(timerInt);
@@ -457,6 +527,7 @@ function renderEnd(){
     ? `רוב הידיים — ${names[0]}: ${r.wins[0]} · ${names[1]}: ${r.wins[1]}`+(r.ties?` · תיקו: ${r.ties}`:'')
     : `ניקוד מצטבר — ${names[0]}: ${r.points[0]} · ${names[1]}: ${r.points[1]}`;
   const youWon = win===seat;
+  renderSeriesBoard();
   // banner appears after all rows have revealed
   const bannerDelay = (0.1 + r.rows.length*0.32 + 0.2).toFixed(2);
   const banner=document.getElementById('banner');

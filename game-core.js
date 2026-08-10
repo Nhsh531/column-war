@@ -169,7 +169,16 @@ function finish(g) {
   let winner;
   if (g.mode === 'majority') winner = wA > wB ? 0 : wB > wA ? 1 : -1;
   else winner = pA > pB ? 0 : pB > pA ? 1 : -1;
-  g.result = { mode: g.mode, winner, wins: [wA, wB], points: [pA, pB], ties, rows };
+  // strongest single poker hand in the game (for series records)
+  const allHands = [];
+  for (let i = 0; i < 5; i++) {
+    allHands.push({ seat: 0, score: ha[i].score, cat: ha[i].cat, name: handName(ha[i]), label: labels[i] });
+    allHands.push({ seat: 1, score: hb[i].score, cat: hb[i].cat, name: handName(hb[i]), label: labels[i] });
+  }
+  allHands.sort((a, b) => cmp(b.score, a.score));
+  const top = allHands[0];
+  const best = { seat: top.seat, cat: top.cat, name: top.name, label: top.label };
+  g.result = { mode: g.mode, winner, wins: [wA, wB], points: [pA, pB], ties, rows, best };
 }
 function hands(p) { const h = p.columns.map(c => evaluate5(c)); h.push(bestOf(p.hand)); return h; }
 

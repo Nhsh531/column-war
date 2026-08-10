@@ -42,9 +42,46 @@ function makeCode() {
 function send(ws, obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
 
 function broadcastState(room) {
+  maybeScore(room); // if the game just ended, fold it into the series before sending
   room.sockets.forEach((ws, i) => {
-    if (ws) send(ws, { type: 'state', state: core.view(room.game, i, room.names) });
+    if (ws) {
+      const st = core.view(room.game, i, room.names);
+      st.series = seriesView(room);
+      send(ws, { type: 'state', state: st });
+    }
   });
+}
+
+/* ---- series scoreboard (per room, persists across rematches within the session) ---- */
+function newSeries() {
+  return { games: 0, wins: [0, 0], points: [0, 0], bestHand: null, topGame: null };
+}
+function seriesView(room) {
+  const s = room.series || newSeries();
+  return {
+    games: s.games, names: room.names, mode: room.mode,
+    wins: s.wins, points: s.points, bestHand: s.bestHand, topGame: s.topGame,
+  };
+}
+function scoreSeries(room) {
+  const r = room.game && room.game.result;
+  if (!r || !room.series) return;
+  const s = room.series;
+  s.games++;
+  if (r.winner === 0) s.wins[0]++; else if (r.winner === 1) s.wins[1]++;
+  s.points[0] += r.points[0]; s.points[1] += r.points[1];
+  const topSeat = r.points[0] >= r.points[1] ? 0 : 1;
+  const topVal = Math.max(r.points[0], r.points[1]);
+  if (!s.topGame || topVal > s.topGame.value) s.topGame = { value: topVal, player: room.names[topSeat] };
+  if (r.best && (!s.bestHand || r.best.cat > s.bestHand.cat)) {
+    s.bestHand = { name: r.best.name, cat: r.best.cat, player: room.names[r.best.seat] };
+  }
+}
+function maybeScore(room) {
+  if (room.game && room.game.over && !room.game._scored) {
+    room.game._scored = true;
+    scoreSeries(room);
+  }
 }
 
 function clearTimer(room) { if (room.timer) { clearTimeout(room.timer); room.timer = null; } }
@@ -125,6 +162,7 @@ wss.on('connection', (ws) => {
         names: [(msg.name || 'שחקן 1').slice(0, 16), null],
         sockets: [ws, null],
         game: null, timer: null,
+        series: newSeries(),
       };
       rooms.set(code, room);
       ws.room = code; ws.seat = 0;
@@ -143,6 +181,7 @@ wss.on('connection', (ws) => {
         sockets: [ws, null],
         game: null, timer: null, bot: true,
         difficulty: ['easy', 'medium', 'hard', 'veryhard'].includes(msg.difficulty) ? msg.difficulty : 'medium',
+        series: newSeries(),
       };
       rooms.set(code, room);
       ws.room = code; ws.seat = 0;
