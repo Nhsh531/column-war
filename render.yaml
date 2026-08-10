@@ -1,0 +1,12 @@
+# Render Blueprint — פריסה בלחיצה אחת של מלחמת טורים
+# מעלים את התיקייה הזו כ-repo ב-GitHub, וב-Render בוחרים "New > Blueprint".
+services:
+  - type: web
+    name: column-war
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"

@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>מלחמת טורים — אונליין</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b131a;--felt:#15654a;--felt2:#0f4a37;--gold:#e7b64b;--txt:#f3f7f5;
+    --muted:#9fb3ac;--line:#274a3f;--red:#e04b57;--good:#57c98a;--panel:#12212b;--panel2:#193040;
+    --shadow:0 6px 20px rgba(0,0,0,.45);--safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{font-family:"Nunito",system-ui,Arial,sans-serif;color:var(--txt);min-height:100dvh;
+    background:radial-gradient(120% 90% at 50% -10%,#123141 0%,var(--bg) 60%);
+    padding:calc(8px + var(--safe-t)) 10px calc(10px + var(--safe-b))}
+  h1,h2,h3,.brand{font-family:"Fredoka",sans-serif;font-weight:600}
+  .wrap{max-width:960px;margin:0 auto}
+  h1.brand{font-size:26px;text-align:center;margin:2px 0 10px}
+  h1.brand span{color:var(--gold)}
+  .muted{color:var(--muted)}
+  button{font-family:"Fredoka",inherit;cursor:pointer;border:none;border-radius:14px;padding:13px 18px;
+    font-size:16px;background:var(--gold);color:#2b1e00;font-weight:600;min-height:48px;
+    transition:transform .12s;box-shadow:var(--shadow)}
+  button:active{transform:scale(.97)}
+  button.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line);box-shadow:none}
+  button.big{width:100%;font-size:18px;padding:15px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .screen{display:none;animation:fade .25s}.screen.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .opt{flex:1 1 44%;min-width:130px;background:var(--panel2);border:2px solid transparent;border-radius:14px;
+    padding:14px;cursor:pointer;text-align:center;min-height:56px;display:flex;align-items:center;justify-content:center;font-weight:700}
+  .opt small{display:block;color:var(--muted);font-weight:600;font-size:12px;margin-top:3px}
+  .opt.sel{border-color:var(--gold);background:#1b3524}
+  .lbl-cap{color:var(--muted);font-size:13px;margin-bottom:9px;font-family:"Fredoka",sans-serif}
+  input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:12px;
+    padding:12px;font-size:16px;width:100%;font-family:inherit}
+  input.code{text-transform:uppercase;letter-spacing:6px;text-align:center;font-size:26px;font-family:"Fredoka"}
+  .felt{background:radial-gradient(120% 120% at 50% 0%,var(--felt) 0%,var(--felt2) 100%);
+    border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:12px;margin:9px 0;
+    box-shadow:inset 0 0 60px rgba(0,0,0,.35),var(--shadow)}
+  .felt h3{margin:0 0 9px;font-size:13px;color:#cfe9de;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .felt h3 .tag{background:rgba(0,0,0,.28);padding:3px 9px;border-radius:999px;font-size:12px}
+  .topbar{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+  .pill{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:700}
+  .pill b{color:var(--gold)}
+  .timerbar{height:7px;background:rgba(0,0,0,.3);border-radius:7px;overflow:hidden;margin:6px 0 2px}
+  .timerbar>i{display:block;height:100%;background:var(--gold);transition:width .3s linear}
+  .timerbar.low>i{background:var(--red)}
+  .thinking{text-align:center;color:var(--gold);font-family:"Fredoka";font-size:15px;padding:6px;min-height:22px}
+  .cols{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+  .col{background:rgba(0,0,0,.16);border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:5px;
+    min-height:96px;display:flex;flex-direction:column;gap:3px;transition:border-color .15s,box-shadow .15s}
+  .col .lbl{font-size:10px;color:#bfe0d3;text-align:center;font-weight:700}
+  .col.place{cursor:pointer}
+  .col.place:hover,.col.place:active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(231,182,75,.35) inset}
+  .col.full{border-color:rgba(231,182,75,.3)}
+  .card{width:100%;aspect-ratio:5/7;max-width:58px;margin:0 auto;border-radius:8px;
+    background:linear-gradient(160deg,#fff,#eef2f4);color:#16232b;display:flex;flex-direction:column;
+    justify-content:space-between;padding:3px 5px;font-family:"Fredoka";font-weight:600;
+    box-shadow:0 2px 5px rgba(0,0,0,.35);animation:deal .28s}
+  @keyframes deal{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
+  .card.red{color:var(--red)}
+  .card .r{font-size:14px;line-height:1}.card .s{font-size:18px;text-align:center;margin:-2px 0}
+  .card .r.b{align-self:flex-end;transform:rotate(180deg);font-size:12px}
+  .card.back{background:repeating-linear-gradient(45deg,#1d5f80,#1d5f80 7px,#164a63 7px,#164a63 14px);
+    border:2px solid #2f7ba1}
+  .card.mini{max-width:44px}.card.tiny{max-width:38px}
+  .hand{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .hand .card{max-width:60px;cursor:pointer}
+  .hand .card.sel{outline:3px solid var(--gold);transform:translateY(-8px)}
+  .hand .card.burnable{outline:3px solid #ff7a3d}
+  .hint{font-size:13.5px;color:#dfeee7;text-align:center;margin:6px 2px;min-height:20px;font-weight:600}
+  .center{min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:16px;padding:20px}
+  .codebox{font-family:"Fredoka";font-size:44px;letter-spacing:10px;color:var(--gold);
+    background:var(--panel);border:2px dashed var(--gold);border-radius:16px;padding:14px 26px}
+  .matchup{display:grid;grid-template-columns:1fr 60px 1fr;gap:8px;align-items:center;background:var(--panel);
+    border:1px solid var(--line);border-radius:14px;padding:9px;margin:7px 0}
+  .mini-cards{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+  .side{padding:5px;border-radius:10px}
+  .side.win{background:rgba(87,201,138,.15);box-shadow:0 0 0 1px rgba(87,201,138,.4) inset}
+  .vs{font-size:12px;color:var(--muted);text-align:center;font-weight:700}
+  .handname{font-size:12px;color:var(--gold);margin-top:4px;text-align:center;font-weight:700}
+  .banner{font-family:"Fredoka";font-size:22px;font-weight:600;text-align:center;padding:16px;border-radius:16px;
+    background:linear-gradient(160deg,#1b3524,#12251a);border:1px solid var(--gold);margin:6px 0}
+  .banner small{display:block;font-size:14px;color:var(--muted);margin-top:6px;font-family:"Nunito";font-weight:700}
+  .toast{position:fixed;top:calc(10px + var(--safe-t));left:50%;transform:translateX(-50%);background:var(--red);
+    color:#fff;padding:10px 18px;border-radius:12px;font-weight:700;z-index:99;box-shadow:var(--shadow);display:none}
+  @media (max-width:380px){.card,.hand .card{max-width:52px}.col{min-height:88px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+<div class="wrap">
+  <h1 class="brand">מלחמת <span>טורים</span></h1>
+
+  <!-- HOME -->
+  <div id="home" class="screen active">
+    <div class="panel">
+      <div class="lbl-cap">שם השחקן</div>
+      <input id="name" type="text" value="" placeholder="איך קוראים לך">
+    </div>
+
+    <div class="panel">
+      <div class="lbl-cap">פתיחת משחק חדש</div>
+      <div class="row">
+        <div class="opt sel" data-mode="majority">רוב הידיים<small>הכי הרבה טורים</small></div>
+        <div class="opt" data-mode="points">ניקוד מצטבר<small>סכום החוזק</small></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="opt" data-t="10">10 שנ׳</div>
+        <div class="opt sel" data-t="20">20 שנ׳</div>
+        <div class="opt" data-t="30">30 שנ׳</div>
+      </div>
+      <button class="big" style="margin-top:12px" onclick="createRoom()">צור חדר וקבל קוד</button>
+    </div>
+
+    <div class="panel">
+      <div class="lbl-cap">הצטרפות לחדר קיים</div>
+      <input id="joinCode" class="code" type="text" maxlength="4" placeholder="ABCD">
+      <button class="big ghost" style="margin-top:12px" onclick="joinRoom()">הצטרף</button>
+    </div>
+  </div>
+
+  <!-- LOBBY -->
+  <div id="lobby" class="screen">
+    <div class="center">
+      <p class="muted">שתפו את הקוד עם החבר/ה כדי שיצטרפו:</p>
+      <div class="codebox" id="lobbyCode">----</div>
+      <button class="ghost" id="copyBtn" onclick="copyCode()">העתק קוד</button>
+      <p class="muted" id="lobbyStatus">ממתין לשחקן שני…</p>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="game" class="screen">
+    <div class="topbar">
+      <div class="pill">תור: <b id="curName"></b></div>
+      <div class="pill">קופה: <b id="deckCount"></b></div>
+      <div class="pill">⏱ <b id="timeLeft">—</b></div>
+    </div>
+    <div class="timerbar" id="timerbar"><i id="timerfill"></i></div>
+    <div class="thinking" id="thinking"></div>
+    <div class="felt">
+      <h3><span id="oppName"></span> <span class="tag">יד: <span id="oppHandCount"></span></span></h3>
+      <div class="cols" id="oppCols"></div>
+    </div>
+    <div class="felt">
+      <h3><span id="meName"></span> <span class="tag">הטורים שלך</span></h3>
+      <div class="cols" id="myCols"></div>
+    </div>
+    <div class="panel" style="margin:9px 0">
+      <div class="row" style="justify-content:space-between;margin-bottom:4px">
+        <div class="lbl-cap" style="margin:0">היד שלך</div>
+        <button class="ghost" id="burnBtn" style="min-height:40px;padding:8px 14px;font-size:14px" onclick="armBurn()">🔥 שריפה (פעם אחת)</button>
+      </div>
+      <div class="hint" id="hint"></div>
+      <div class="hand" id="myHand"></div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div id="end" class="screen">
+    <div id="banner" class="banner"></div>
+    <div id="matchups"></div>
+    <button class="big" style="margin:14px 0 8px" onclick="rematch()">עוד סיבוב</button>
+    <button class="big ghost" onclick="location.reload()">יציאה</button>
+  </div>
+</div>
+
+<script>
+const SUITS_RED=new Set(['♥','♦']);
+const RANK_LABEL={11:'J',12:'Q',13:'K',14:'A'};
+const rankLabel=r=>RANK_LABEL[r]||String(r);
+
+let ws=null, seat=null, state=null, selected=null, burnArmed=false, code=null, timerInt=null;
+
+/* option pickers on home */
+document.querySelectorAll('#home .row').forEach(rowEl=>{
+  rowEl.addEventListener('click',e=>{const o=e.target.closest('.opt');if(!o)return;
+    [...o.parentNode.children].forEach(c=>c.classList.remove('sel'));o.classList.add('sel');});
+});
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2600);}
+
+function connect(){
+  return new Promise((res,rej)=>{
+    if(ws&&ws.readyState===1)return res();
+    const proto=location.protocol==='https:'?'wss':'ws';
+    ws=new WebSocket(`${proto}://${location.host}`);
+    ws.onopen=()=>res();
+    ws.onerror=()=>rej();
+    ws.onmessage=onMsg;
+    ws.onclose=()=>{if(state&&!state.over)toast('החיבור נותק');};
+  });
+}
+function sendWs(o){ if(ws&&ws.readyState===1) ws.send(JSON.stringify(o)); }
+
+async function createRoom(){
+  const name=document.getElementById('name').value.trim()||'שחקן 1';
+  const mode=document.querySelector('#home [data-mode].sel').dataset.mode;
+  const timer=+document.querySelector('#home [data-t].sel').dataset.t;
+  try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
+  sendWs({type:'create',name,mode,timer});
+}
+async function joinRoom(){
+  const name=document.getElementById('name').value.trim()||'שחקן 2';
+  const c=document.getElementById('joinCode').value.trim().toUpperCase();
+  if(c.length<4)return toast('הקוד צריך להיות 4 תווים');
+  try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
+  sendWs({type:'join',code:c,name});
+}
+function copyCode(){ if(code){navigator.clipboard?.writeText(code);toast('הקוד הועתק');} }
+function rematch(){ sendWs({type:'rematch'}); }
+
+function onMsg(ev){
+  let m;try{m=JSON.parse(ev.data);}catch{return;}
+  if(m.type==='error'){toast(m.msg);return;}
+  if(m.type==='created'){seat=m.seat;code=m.code;document.getElementById('lobbyCode').textContent=m.code;show('lobby');return;}
+  if(m.type==='joined'){seat=m.seat;code=m.code;return;}
+  if(m.type==='lobby'){
+    if(seat===0&&!m.canStart){document.getElementById('lobbyStatus').textContent='ממתין לשחקן שני…';}
+    return;
+  }
+  if(m.type==='opponent_left'){toast(m.msg||'היריב יצא');setTimeout(()=>location.reload(),1800);return;}
+  if(m.type==='state'){state=m.state;selected=null;burnArmed=false;render();return;}
+}
+
+/* ---------- rendering ---------- */
+function cardHTML(c,o={}){
+  if(!c||c.back)return `<div class="card back ${o.mini?'mini':''} ${o.tiny?'tiny':''}"></div>`;
+  const red=SUITS_RED.has(c.suit)?'red':'';
+  const cls=[red,o.mini?'mini':'',o.tiny?'tiny':'',o.sel?'sel':'',o.burnable?'burnable':''].join(' ');
+  const click=o.click?`onclick="${o.click}"`:'';
+  return `<div class="card ${cls}" ${click}>
+    <div class="r">${rankLabel(c.rank)}${c.suit}</div><div class="s">${c.suit}</div>
+    <div class="r b">${rankLabel(c.rank)}${c.suit}</div></div>`;
+}
+function render(){
+  if(!state)return;
+  if(state.over){renderEnd();return;}
+  show('game');
+  const me=state.me, opp=state.opp;
+  document.getElementById('curName').textContent = state.names[state.turn];
+  document.getElementById('deckCount').textContent = state.deckCount;
+  document.getElementById('meName').textContent = me.name;
+  document.getElementById('oppName').textContent = opp.name+' (יריב)';
+  document.getElementById('oppHandCount').textContent = opp.handCount;
+
+  document.getElementById('oppCols').innerHTML = opp.columns.map((col,i)=>{
+    const cards=col.map(c=>cardHTML(c,{mini:true})).join('');
+    return `<div class="col ${col.length>=5?'full':''}"><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
+  }).join('');
+
+  const my=state.yourTurn;
+  document.getElementById('myCols').innerHTML = me.columns.map((col,i)=>{
+    const cards=col.map(c=>cardHTML(c,{mini:true})).join('');
+    const full=col.length>=5, canPlace=!full&&my&&selected;
+    return `<div class="col ${full?'full':''} ${canPlace?'place':''}" ${canPlace?`onclick="place(${i})"`:''}><div class="lbl">טור ${i+1} · ${col.length}/5</div>${cards}</div>`;
+  }).join('');
+
+  document.getElementById('myHand').innerHTML = me.hand.map(c=>cardHTML(c,{
+    sel:selected===c.id, burnable:burnArmed&&my, click:my?`selectCard('${c.id}')`:''
+  })).join('');
+
+  const bb=document.getElementById('burnBtn');
+  bb.disabled=!my||me.burnedUsed;
+  bb.textContent=me.burnedUsed?'🔥 שריפה נוצלה':(burnArmed?'🔥 בחרו קלף (ביטול)':'🔥 שריפה (פעם אחת)');
+
+  document.getElementById('thinking').textContent = my?'':'תור היריב…';
+  let hint='';
+  if(!my)hint='ממתין ליריב…';
+  else{
+    if(state.justDrawnId){const d=me.hand.find(c=>c.id===state.justDrawnId);if(d)hint=`משכת: ${rankLabel(d.rank)}${d.suit}. `;}
+    if(burnArmed)hint+='לחצו על קלף כדי לזרוק ולמשוך חדש.';
+    else if(selected)hint+='עכשיו לחצו על טור להורדה.';
+    else hint+='בחרו קלף מהיד.';
+  }
+  document.getElementById('hint').textContent=hint;
+  startCountdown();
+}
+function startCountdown(){
+  clearInterval(timerInt);
+  const bar=document.getElementById('timerbar'), fill=document.getElementById('timerfill'), lbl=document.getElementById('timeLeft');
+  function tick(){
+    if(!state||state.over||state.turnEndsAt==null){lbl.textContent='—';fill.style.width='0%';return;}
+    const left=Math.max(0,(state.turnEndsAt-Date.now())/1000);
+    lbl.textContent=Math.ceil(left);
+    fill.style.width=Math.min(100,left/state.timerLen*100)+'%';
+    bar.classList.toggle('low',left<=5);
+  }
+  tick();timerInt=setInterval(tick,300);
+}
+
+/* ---------- actions ---------- */
+function selectCard(id){
+  if(!state.yourTurn)return;
+  if(burnArmed){ if(!state.me.burnedUsed) sendWs({type:'move',action:'burn',cardId:id}); burnArmed=false; return; }
+  selected=(selected===id)?null:id; render();
+}
+function armBurn(){ if(!state.yourTurn||state.me.burnedUsed)return; burnArmed=!burnArmed; selected=null; render(); }
+function place(col){
+  if(!state.yourTurn||selected==null)return;
+  sendWs({type:'move',action:'place',cardId:selected,col});
+  selected=null;
+}
+
+/* ---------- end ---------- */
+function renderEnd(){
+  show('end');clearInterval(timerInt);
+  const r=state.result, names=state.names;
+  const win=r.winner;
+  let detail = r.mode==='majority'
+    ? `רוב הידיים — ${names[0]}: ${r.wins[0]} · ${names[1]}: ${r.wins[1]}`+(r.ties?` · תיקו: ${r.ties}`:'')
+    : `ניקוד מצטבר — ${names[0]}: ${r.points[0]} · ${names[1]}: ${r.points[1]}`;
+  const youWon = win===seat;
+  const banner=document.getElementById('banner');
+  banner.innerHTML=(win===-1?'תיקו!':(youWon?'🏆 ניצחת!':`${names[win]} ניצח`))+`<small>${detail}</small>`;
+
+  document.getElementById('matchups').innerHTML=
+    `<div class="matchup" style="background:transparent;border:none;padding-bottom:0">
+       <div class="side" style="text-align:center;font-weight:800;color:var(--gold)">${names[0]}</div>
+       <div class="vs"></div>
+       <div class="side" style="text-align:center;font-weight:800;color:var(--gold)">${names[1]}</div></div>`+
+    r.rows.map(row=>`<div class="matchup">
+      <div class="side ${row.winner===0?'win':''}"><div class="mini-cards">${row.a.cards.map(c=>cardHTML(c,{tiny:true})).join('')}</div><div class="handname">${row.a.name}</div></div>
+      <div class="vs">${row.label}${row.winner===-1?'<br>תיקו':''}</div>
+      <div class="side ${row.winner===1?'win':''}"><div class="mini-cards">${row.b.cards.map(c=>cardHTML(c,{tiny:true})).join('')}</div><div class="handname">${row.b.name}</div></div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
