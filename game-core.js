@@ -90,14 +90,14 @@ function drawCard(g) {
   return g.deck.length ? g.deck.pop() : null;
 }
 
-/* draw one card for the player whose turn it now is */
+/* begin a turn. place-first model: the player keeps 6 cards in hand,
+   places one (down to 5), then refills to 6 — so a hand is never shown as 7 */
 function startTurn(g) {
   if (g.over) return;
-  const p = g.players[g.turn];
-  if (allFull(p)) { g.turn = 1 - g.turn; if (allFull(g.players[g.turn])) { finish(g); return; } }
-  const d = drawCard(g);
-  if (d) g.players[g.turn].hand.push(d);
-  g.justDrawn[g.turn] = d ? d.id : null;
+  if (allFull(g.players[g.turn])) {
+    g.turn = 1 - g.turn;
+    if (allFull(g.players[g.turn])) { finish(g); return; }
+  }
   g.turnEndsAt = Date.now() + g.timerLen * 1000;
 }
 
@@ -110,6 +110,10 @@ function place(g, player, cardId, col) {
   const i = p.hand.findIndex(c => c.id === cardId);
   if (i < 0) return { ok: false, error: 'אין קלף כזה ביד' };
   p.columns[col].push(p.hand.splice(i, 1)[0]);
+  // refill the hand back to 6 (place-first model)
+  const d = drawCard(g);
+  g.justDrawn[player] = d ? d.id : null;
+  if (d) p.hand.push(d);
   advance(g);
   return { ok: true };
 }
@@ -233,10 +237,29 @@ function leastUseful(p) {
   }
   return worst;
 }
+/* rough poker potential of a partial set of cards (1-5), used to compare
+   the bot's own columns against the opponent's visible (face-up) cards */
+function partialStrength(cards) {
+  if (!cards.length) return 0;
+  let s = 0;
+  const ranks = {}, suits = {};
+  for (const c of cards) { ranks[c.rank] = (ranks[c.rank] || 0) + 1; suits[c.suit] = (suits[c.suit] || 0) + 1; }
+  for (const n of Object.values(ranks)) { if (n === 2) s += 20; else if (n === 3) s += 55; else if (n >= 4) s += 110; }
+  const maxSuit = Math.max(...Object.values(suits));
+  s += (maxSuit - 1) * 8;                       // flush potential
+  const rs = [...new Set(cards.map(c => c.rank))].sort((a, b) => a - b);
+  let run = 1, best = 1;
+  for (let i = 1; i < rs.length; i++) { if (rs[i] - rs[i - 1] === 1) { run++; if (run > best) best = run; } else run = 1; }
+  s += (best - 1) * 6;                           // straight potential
+  s += Math.max(...cards.map(c => c.rank)) * 0.4;
+  return s;
+}
+
 function botMove(g, difficulty = 'medium') {
   if (g.over) return;
   const player = g.turn;
   const p = g.players[player];
+  const opp = g.players[1 - player];
   const open = p.columns.map((c, i) => i).filter(i => p.columns[i].length < 5);
   if (!open.length || !p.hand.length) return;
 
@@ -248,25 +271,48 @@ function botMove(g, difficulty = 'medium') {
     return;
   }
 
-  // MEDIUM / HARD: optional one-time burn of the least useful card
+  const isVH = difficulty === 'veryhard';
+  const bestPick = difficulty === 'hard' || isVH;
+
+  // MEDIUM / HARD / VERY-HARD: optional one-time burn of the least useful card
   if (!p.burnedUsed && g.deck.length > 6) {
     const worst = leastUseful(p);
-    const thresh = difficulty === 'hard' ? 6 : 4;
+    const thresh = bestPick ? 6 : 4;
     if (worst && worst.score < thresh) burn(g, player, worst.id);
   }
 
-  // score every (card, column) by synergy, keeping strong cards in hand
+  // ----- opponent awareness (visible cards only) -----
+  // the opponent's 5th card in each column is face-down, so only read the first 4
+  const OPP_WEIGHT = isVH ? 9 : difficulty === 'hard' ? 3.5 : 1.5;
+  const SELF_SCALE = isVH ? 0.5 : 1; // very-hard leans harder on beating the opponent than on its own hand
+  const oppScore = opp.columns.map(col => partialStrength(col.slice(0, 4)));
+  const botScore = p.columns.map(col => partialStrength(col));
+  // how worthwhile it is to invest in each column: high when contested/behind and there's room,
+  // low when already winning comfortably or the column is full
+  const priority = p.columns.map((col, i) => {
+    if (col.length >= 5) return 0;
+    const diff = botScore[i] - oppScore[i];      // >0 = bot ahead
+    let pr = Math.max(0.2, Math.min(1.5, 1 - diff / 40));
+    // VERY-HARD also sacrifices hopeless columns: make them a dump target so strong cards go elsewhere
+    if (isVH && diff < -22 && (5 - col.length) <= 2) pr = 0.08;
+    return pr;
+  });
+
+  // score every (card, column): self-building synergy + beating the matched opponent column
   const options = [];
   for (const card of p.hand) {
     for (const ci of open) {
-      options.push({ cardId: card.id, ci, s: synergy(card, p.columns[ci]) - keepValue(card, p) });
+      const self = (synergy(card, p.columns[ci]) - keepValue(card, p)) * SELF_SCALE;
+      const gain = partialStrength(p.columns[ci].concat([card])) - botScore[ci];
+      const matchup = gain * priority[ci] * OPP_WEIGHT;
+      options.push({ cardId: card.id, ci, s: self + matchup });
     }
   }
   options.sort((a, b) => b.s - a.s);
 
-  // HARD always takes the best move; MEDIUM picks from the top few (some slack)
+  // HARD / VERY-HARD take the best move; MEDIUM picks from the top few (some slack)
   let pick;
-  if (difficulty === 'hard') pick = options[0];
+  if (bestPick) pick = options[0];
   else { const top = options.slice(0, Math.min(3, options.length)); pick = top[Math.floor(Math.random() * top.length)]; }
 
   if (pick) place(g, player, pick.cardId, pick.ci);

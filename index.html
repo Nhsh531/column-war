@@ -40,6 +40,27 @@
   .opt.sel{border-color:var(--gold);background:#1b3524}
   .opt.sm{flex:1 1 28%;min-width:70px;padding:11px 6px;font-size:14px;font-weight:700}
   .row.grid5{gap:7px}
+  /* custom themed dropdown */
+  .dd{position:relative}
+  .dd-btn{width:100%;display:flex;align-items:center;justify-content:space-between;
+    background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;font-family:"Fredoka",sans-serif;font-weight:700;font-size:16px;min-height:52px}
+  .dd-chev{width:9px;height:9px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);
+    transform:rotate(45deg) translateY(-2px);transition:transform .2s}
+  .dd.open .dd-btn{border-color:var(--gold);box-shadow:0 0 0 2px rgba(231,182,75,.25)}
+  .dd.open .dd-chev{transform:rotate(-135deg) translateY(2px)}
+  .dd-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;
+    background:#132530;border:1px solid var(--gold);border-radius:12px;overflow:hidden;box-shadow:var(--shadow);
+    opacity:0;transform:translateY(-8px) scale(.98);transform-origin:top;pointer-events:none;
+    transition:opacity .17s ease,transform .17s ease}
+  .dd.open .dd-list{opacity:1;transform:none;pointer-events:auto}
+  .dd-item{padding:13px 16px;font-family:"Fredoka",sans-serif;font-weight:600;font-size:15px;cursor:pointer;
+    border-bottom:1px solid rgba(255,255,255,.055);display:flex;align-items:center;gap:8px}
+  .dd-item:last-child{border-bottom:none}
+  .dd-item:hover,.dd-item:active{background:#1b3524}
+  .dd-item.sel{color:var(--gold);background:#16281c}
+  .dd-item.sel::after{content:"";width:7px;height:11px;margin-inline-start:auto;
+    border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg)}
   .lbl-cap{color:var(--muted);font-size:13px;margin-bottom:9px;font-family:"Fredoka",sans-serif}
   input[type=text]{background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:12px;
     padding:12px;font-size:16px;width:100%;font-family:inherit}
@@ -63,19 +84,26 @@
   .col.place{cursor:pointer}
   .col.place:hover,.col.place:active{border-color:var(--gold);box-shadow:0 0 0 2px rgba(231,182,75,.35) inset}
   .col.full{border-color:rgba(231,182,75,.3)}
-  .card{width:100%;aspect-ratio:5/7;max-width:58px;margin:0 auto;border-radius:8px;
-    background:linear-gradient(160deg,#fff,#eef2f4);color:#16232b;display:flex;flex-direction:column;
-    justify-content:space-between;padding:3px 5px;font-family:"Fredoka";font-weight:600;
-    box-shadow:0 2px 5px rgba(0,0,0,.35);animation:deal .28s}
-  @keyframes deal{from{opacity:0;transform:translateY(-8px) scale(.9)}to{opacity:1;transform:none}}
-  .card.red{color:var(--red)}
-  .card .r{font-size:14px;line-height:1}.card .s{font-size:18px;text-align:center;margin:-2px 0}
-  .card .r.b{align-self:flex-end;transform:rotate(180deg);font-size:12px}
+  .card{position:relative;width:100%;aspect-ratio:5/7;max-width:60px;margin:0 auto;border-radius:9px;
+    background:linear-gradient(158deg,#ffffff 0%,#eef3f6 100%);color:#1b2a33;
+    display:flex;flex-direction:column;justify-content:space-between;padding:4px 5px;
+    font-family:"Fredoka",sans-serif;font-weight:600;
+    box-shadow:0 3px 7px rgba(0,0,0,.4),inset 0 0 0 1px rgba(0,0,0,.06)}
+  .card.red{color:#d83a4a}
+  .card .corner{display:flex;flex-direction:column;align-items:center;line-height:.9;width:min-content;z-index:1}
+  .card .corner b{font-size:14px;font-weight:800;letter-spacing:-.5px}
+  .card .corner i{font-size:11px;font-style:normal;margin-top:-1px}
+  .card .corner.br{align-self:flex-end;transform:rotate(180deg)}
+  .card .pip{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:25px;opacity:.9;pointer-events:none}
   .card.back{background:repeating-linear-gradient(45deg,#1d5f80,#1d5f80 7px,#164a63 7px,#164a63 14px);
-    border:2px solid #2f7ba1}
-  .card.mini{max-width:44px}.card.tiny{max-width:38px}
-  .card .hidbadge{position:absolute;top:-5px;left:-5px;width:17px;height:17px;background:var(--gold);
-    border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.55);z-index:2}
+    border:2px solid #2f7ba1;box-shadow:inset 0 0 0 3px rgba(255,255,255,.06),0 3px 7px rgba(0,0,0,.4)}
+  .card.mini{max-width:46px;border-radius:7px;padding:3px 4px}
+  .card.mini .corner b{font-size:11px}.card.mini .corner i{font-size:9px}.card.mini .pip{font-size:19px}
+  .card.tiny{max-width:40px;border-radius:6px}
+  .card.tiny .corner b{font-size:10px}.card.tiny .corner i{font-size:8px}.card.tiny .pip{font-size:16px}
+  .card .hidbadge{position:absolute;top:2px;right:2px;width:15px;height:15px;background:var(--gold);
+    border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.55);z-index:3}
   .card .hidbadge svg{width:11px;height:11px;stroke:#2b1e00;fill:none;stroke-width:2}
   .hidnote{font-size:11.5px;color:#cfe9de;text-align:center;margin-top:9px;display:flex;align-items:center;
     justify-content:center;gap:6px;font-weight:700;opacity:.92}
@@ -133,21 +161,32 @@
         <div class="opt" data-mode="points">ניקוד מצטבר<small>סכום החוזק</small></div>
       </div>
       <div class="lbl-cap" style="margin-top:14px">זמן לתור</div>
-      <div class="row grid5" style="margin-top:2px">
-        <div class="opt sm" data-t="10">10 שנ׳</div>
-        <div class="opt sm sel" data-t="20">20 שנ׳</div>
-        <div class="opt sm" data-t="30">30 שנ׳</div>
-        <div class="opt sm" data-t="60">דקה</div>
-        <div class="opt sm" data-t="120">2 דק׳</div>
+      <div class="dd" id="timerDD">
+        <button type="button" class="dd-btn" onclick="toggleTimerDD(event)">
+          <span id="timerLabel">20 שניות</span>
+          <span class="dd-chev"></span>
+        </button>
+        <div class="dd-list" id="timerList">
+          <div class="dd-item" data-v="10">10 שניות</div>
+          <div class="dd-item sel" data-v="20">20 שניות</div>
+          <div class="dd-item" data-v="30">30 שניות</div>
+          <div class="dd-item" data-v="60">דקה</div>
+          <div class="dd-item" data-v="120">2 דקות</div>
+        </div>
       </div>
-      <div class="lbl-cap" style="margin-top:14px">רמת המחשב (למשחק נגד המחשב)</div>
-      <div class="row" id="diffOpts">
-        <div class="opt sm" data-diff="easy">קל</div>
-        <div class="opt sm sel" data-diff="medium">בינוני</div>
-        <div class="opt sm" data-diff="hard">קשה</div>
+
+      <button class="big" style="margin-top:16px" onclick="createRoom()">צור חדר וקבל קוד</button>
+      <button class="big ghost" style="margin-top:10px" onclick="showSolo()">🤖 שחק נגד המחשב</button>
+
+      <div id="soloPanel" style="display:none;margin-top:14px">
+        <div class="lbl-cap">בחרו רמת מחשב כדי להתחיל</div>
+        <div class="row" id="diffOpts">
+          <div class="opt sm" onclick="startSolo('easy')">קל</div>
+          <div class="opt sm" onclick="startSolo('medium')">בינוני</div>
+          <div class="opt sm" onclick="startSolo('hard')">קשה</div>
+          <div class="opt sm" onclick="startSolo('veryhard')">קשה מאוד</div>
+        </div>
       </div>
-      <button class="big" style="margin-top:14px" onclick="createRoom()">צור חדר וקבל קוד</button>
-      <button class="big ghost" style="margin-top:10px" onclick="soloGame()">🤖 שחק נגד המחשב</button>
     </div>
 
     <div class="panel">
@@ -218,9 +257,29 @@ document.querySelectorAll('#home .row').forEach(rowEl=>{
   rowEl.addEventListener('click',e=>{const o=e.target.closest('.opt');if(!o)return;
     [...o.parentNode.children].forEach(c=>c.classList.remove('sel'));o.classList.add('sel');});
 });
+
+/* ---- custom timer dropdown ---- */
+let timerValue=20;
+function toggleTimerDD(e){ if(e)e.stopPropagation(); document.getElementById('timerDD').classList.toggle('open'); }
+document.getElementById('timerList').addEventListener('click',e=>{
+  const it=e.target.closest('.dd-item'); if(!it)return;
+  timerValue=+it.dataset.v;
+  [...it.parentNode.children].forEach(c=>c.classList.remove('sel')); it.classList.add('sel');
+  document.getElementById('timerLabel').textContent=it.textContent;
+  document.getElementById('timerDD').classList.remove('open');
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('#timerDD')) document.getElementById('timerDD').classList.remove('open'); });
+
+/* ---- vs-computer: reveal difficulty only after choosing to play the computer ---- */
+function showSolo(){
+  const el=document.getElementById('soloPanel');
+  el.style.display='block';
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(t._h);t._h=setTimeout(()=>t.style.display='none',2600);}
 
+let reconnecting=false;
 function connect(){
   return new Promise((res,rej)=>{
     if(ws&&ws.readyState===1)return res();
@@ -229,25 +288,35 @@ function connect(){
     ws.onopen=()=>res();
     ws.onerror=()=>rej();
     ws.onmessage=onMsg;
-    ws.onclose=()=>{if(state&&!state.over)toast('החיבור נותק');};
+    ws.onclose=()=>{ if(state&&!state.over&&code!=null&&seat!=null) attemptReconnect(); };
   });
+}
+async function attemptReconnect(){
+  if(reconnecting)return;
+  reconnecting=true;
+  document.getElementById('thinking').textContent='מתחבר מחדש…';
+  toast('מתחבר מחדש…');
+  for(let i=0;i<8;i++){
+    await new Promise(r=>setTimeout(r,1300));
+    try{ await connect(); sendWs({type:'resume',code,seat}); reconnecting=false; return; }
+    catch(e){ /* keep trying */ }
+  }
+  reconnecting=false;
+  toast('החיבור אבד. רענן את הדף כדי להמשיך.');
 }
 function sendWs(o){ if(ws&&ws.readyState===1) ws.send(JSON.stringify(o)); }
 
 async function createRoom(){
   const name=document.getElementById('name').value.trim()||'שחקן 1';
   const mode=document.querySelector('#home [data-mode].sel').dataset.mode;
-  const timer=+document.querySelector('#home [data-t].sel').dataset.t;
   try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
-  sendWs({type:'create',name,mode,timer});
+  sendWs({type:'create',name,mode,timer:timerValue});
 }
-async function soloGame(){
+async function startSolo(difficulty){
   const name=document.getElementById('name').value.trim()||'את/ה';
   const mode=document.querySelector('#home [data-mode].sel').dataset.mode;
-  const timer=+document.querySelector('#home [data-t].sel').dataset.t;
-  const difficulty=document.querySelector('#home [data-diff].sel').dataset.diff;
   try{await connect();}catch{return toast('לא ניתן להתחבר לשרת');}
-  sendWs({type:'solo',name,mode,timer,difficulty});
+  sendWs({type:'solo',name,mode,timer:timerValue,difficulty});
 }
 async function joinRoom(){
   const name=document.getElementById('name').value.trim()||'שחקן 2';
@@ -290,6 +359,9 @@ function onMsg(ev){
     return;
   }
   if(m.type==='opponent_left'){toast(m.msg||'היריב יצא');setTimeout(()=>location.reload(),1800);return;}
+  if(m.type==='opponent_wait'){toast(m.msg||'היריב מתחבר מחדש…');return;}
+  if(m.type==='opponent_back'){toast('היריב חזר');return;}
+  if(m.type==='resumed'){seat=m.seat;code=m.code;toast('חזרת למשחק');return;}
   if(m.type==='state'){state=m.state;selected=null;burnArmed=false;render();return;}
 }
 
@@ -300,9 +372,11 @@ function cardHTML(c,o={}){
   const cls=[red,o.mini?'mini':'',o.tiny?'tiny':'',o.sel?'sel':'',o.burnable?'burnable':''].join(' ');
   const click=o.click?`onclick="${o.click}"`:'';
   const badge=o.hidden?`<span class="hidbadge" title="מוסתר מהיריב">${EYE_OFF}</span>`:'';
+  const R=rankLabel(c.rank), S=c.suit;
   return `<div class="card ${cls}" ${click}>${badge}
-    <div class="r">${rankLabel(c.rank)}${c.suit}</div><div class="s">${c.suit}</div>
-    <div class="r b">${rankLabel(c.rank)}${c.suit}</div></div>`;
+    <div class="corner"><b>${R}</b><i>${S}</i></div>
+    <div class="pip">${S}</div>
+    <div class="corner br"><b>${R}</b><i>${S}</i></div></div>`;
 }
 function render(){
   if(!state)return;

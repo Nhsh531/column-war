@@ -17,7 +17,18 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
-/* rooms: code -> { code, mode, timerLen, names:[], sockets:[ws,ws], game, timer } */
+/* keepalive: ping every client so proxies/mobile don't silently drop the socket */
+function heartbeat() { this.isAlive = true; }
+const keepAlive = setInterval(() => {
+  wss.clients.forEach(ws => {
+    if (ws.isAlive === false) return ws.terminate();
+    ws.isAlive = false;
+    try { ws.ping(); } catch (e) { /* ignore */ }
+  });
+}, 25000);
+wss.on('close', () => clearInterval(keepAlive));
+
+/* rooms: code -> { code, mode, timerLen, names:[], sockets:[ws,ws], game, timer, bot, difficulty, graceTimer } */
 const rooms = new Map();
 
 function makeCode() {
@@ -77,10 +88,33 @@ function startGame(room) {
 wss.on('connection', (ws) => {
   ws.room = null;
   ws.seat = null;
+  ws.isAlive = true;
+  ws.on('pong', heartbeat);
 
   ws.on('message', (raw) => {
     let msg;
     try { msg = JSON.parse(raw); } catch { return; }
+
+    if (msg.type === 'resume') {
+      const code = (msg.code || '').toUpperCase().trim();
+      const room = rooms.get(code);
+      if (!room) return send(ws, { type: 'error', msg: 'המשחק כבר לא זמין, התחילו מחדש' });
+      const seat = msg.seat === 1 ? 1 : 0;
+      if (room.sockets[seat] && room.sockets[seat] !== ws) return send(ws, { type: 'error', msg: 'המושב תפוס' });
+      room.sockets[seat] = ws;
+      ws.room = code; ws.seat = seat;
+      if (room.graceTimer) { clearTimeout(room.graceTimer); room.graceTimer = null; }
+      send(ws, { type: 'resumed', code, seat });
+      const other = room.sockets[1 - seat];
+      if (other) send(other, { type: 'opponent_back' });
+      if (room.game) {
+        // give the returning player a fresh clock if it's their turn
+        if (!room.game.over && room.game.turn === seat) room.game.turnEndsAt = Date.now() + room.game.timerLen * 1000;
+        send(ws, { type: 'state', state: core.view(room.game, seat, room.names) });
+        progress(room);
+      }
+      return;
+    }
 
     if (msg.type === 'create') {
       const code = makeCode();
@@ -108,7 +142,7 @@ wss.on('connection', (ws) => {
         names: [(msg.name || 'שחקן').slice(0, 16), 'המחשב'],
         sockets: [ws, null],
         game: null, timer: null, bot: true,
-        difficulty: ['easy', 'medium', 'hard'].includes(msg.difficulty) ? msg.difficulty : 'medium',
+        difficulty: ['easy', 'medium', 'hard', 'veryhard'].includes(msg.difficulty) ? msg.difficulty : 'medium',
       };
       rooms.set(code, room);
       ws.room = code; ws.seat = 0;
@@ -158,10 +192,20 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     const room = rooms.get(ws.room);
     if (!room) return;
-    clearTimer(room);
+    if (room.sockets[ws.seat] === ws) room.sockets[ws.seat] = null;
+    clearTimer(room); // pause the turn clock while someone is away
     const other = room.sockets[1 - ws.seat];
-    send(other, { type: 'opponent_left', msg: 'היריב התנתק' });
-    rooms.delete(room.code);
+    if (other) send(other, { type: 'opponent_wait', msg: 'היריב מתחבר מחדש…' });
+    // keep the room alive briefly so a dropped player can reconnect
+    if (room.graceTimer) clearTimeout(room.graceTimer);
+    room.graceTimer = setTimeout(() => {
+      if (rooms.get(room.code) !== room) return;
+      if (!room.sockets[ws.seat]) {
+        const o = room.sockets[1 - ws.seat];
+        if (o) send(o, { type: 'opponent_left', msg: 'היריב התנתק' });
+        rooms.delete(room.code);
+      }
+    }, 45000);
   });
 });
 
